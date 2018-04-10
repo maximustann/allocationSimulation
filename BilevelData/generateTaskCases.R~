@@ -1,6 +1,5 @@
-
 generateTask <- function(size, testCase){
-	vmConfig <- paste("./testCase", testCase, "/VMConfig.csv", sep = "")
+	vmConfig <- paste("./dataset/VMConfig.csv")
 	vmCpu <- unlist(read.csv(vmConfig, header = F, sep = ",")[, 1])
 	vmMem <- unlist(read.csv(vmConfig, header = F, sep = ",")[, 2])
 
@@ -16,14 +15,14 @@ generateTask <- function(size, testCase){
 	}
 
 
-	taskM <- floor(rexp(size, 0.001))
+	taskM <- ceiling(rexp(size, 0.001))
 	taskTh <- unlist(selectFromData(size))
-	taskA <- floor(rexp(size, 0.001))
+	taskA <- ceiling(rexp(size, 0.001))
 	# repair the generated dataset
 	for(i in seq_along(taskA)){
 		if(taskTh[i] * taskA[i] > vmCpuLimit){
 			repeat {
-				taskA[i] <- floor(rexp(1, 0.0168))
+				taskA[i] <- ceiling(rexp(1, 0.0168))
 				if(taskTh[i] * taskA[i] <= vmCpuLimit)
 					break;
 			}
@@ -33,27 +32,37 @@ generateTask <- function(size, testCase){
 	for(i in seq_along(taskM)){
 		if(taskTh[i] * taskM[i] > vmMemLimit){
 			repeat {
-				taskM[i] <- floor(rexp(1, 0.0168))
+				taskM[i] <- ceiling(rexp(1, 0.0168))
 				if(taskTh[i] * taskM[i] <= vmMemLimit)
 					break;
 			}
 		}
 	}
 
-	writeMem <- function(data, testCase){
-		filename <- paste("./testCase", testCase, "/taskMem.csv", sep = '')
-		write.table(data, filename, row.names = F, col.names = F, sep = ',')
+	# three types of OS
+	# os1 probability = 0.5
+	# os2 probability = 0.3
+	# os3 probability = 0.2
+	os1 <- 0.5
+	os2 <- 0.8
+	osTypes <- rep(0, size)
+
+	for(i in seq(size)){
+		u <- runif(1)
+		if(u < os1) osTypes[i] <- 0
+		else if((u >= os1) && (u < os2)) osTypes[i] <- 1
+		else osTypes[i] <- 2
 	}
-	writeCpu <- function(data, testCase){
-		filename <- paste("./testCase", testCase, "/taskCpu.csv", sep = '')
-		write.table(data, filename, row.names = F, col.names = F, sep = ',')
+
+	testCaseData <- cbind(taskA, taskM, osTypes)
+
+
+	writeTask <- function(data, testCase){
+		filename <- paste("./dataset/testCase", testCase, ".csv", sep='')
+		write.table(data, filename, row.names = F, col.names = F, sep=',')
 	}
 
-
-	writeCpu(taskA, testCase)
-	writeMem(taskM, testCase)
-
-
+	writeTask(testCaseData, testCase)
 	print('Tasks done')
 }
 
