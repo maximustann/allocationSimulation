@@ -4,5 +4,5 @@ import DataCenterEntity.VM;
 
 import java.util.*;
 public interface VMAllocation {
-    public void execute(ArrayList<PM> pmList, VM vm);
+    public int execute(ArrayList<PM> pmList, VM vm);
 }

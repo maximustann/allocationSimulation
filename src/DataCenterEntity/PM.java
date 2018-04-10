@@ -3,10 +3,16 @@ package DataCenterEntity;
 import java.util.*;
 
 public class PM implements Holder {
+    // This is a global variable. It will be incremented by 1 whenever a new PM is created
+    // This variable is useful because it prevents duplicated pmID
+    static int pmCounter = 0;
+
+
     static double CLOSED = 0;
     static double OPEN = 1;
 
-    private int number;
+    // id starts from 1
+    private int id;
     private double cpu_configuration;
     private double mem_configuration;
     private double cpu;
@@ -19,13 +25,14 @@ public class PM implements Holder {
     private ArrayList<VM> vmList;
     private double energyConsumption;
 
-    public PM(double cpu, double mem, double status, int number, double k, double maxEnergy) {
+    public PM(double cpu, double mem, double k, double maxEnergy) {
         cpu_configuration = this.cpu = cpu;
         mem_configuration = this.mem = mem;
         this.status = status;
-        this.number = number;
         this.k = k;
         this.maxEnergy = maxEnergy;
+        pmCounter += 1;
+        id = pmCounter;
     }
 
     public double calEnergy(){
@@ -76,7 +83,7 @@ public class PM implements Holder {
     }
     public ArrayList<VM> removeVM(double vmNum){
         for(int i = 0; i < vmList.size(); i++){
-            if(vmList.get(i).getNumber() == vmNum){
+            if(vmList.get(i).getID() == vmNum){
                 vmList.remove(i);
                 removeCpu(vmList.get(i));
                 removeMem(vmList.get(i));
@@ -112,17 +119,13 @@ public class PM implements Holder {
         this.status = status;
     }
 
-    public double getNumber() {
-        return number;
-    }
-
-    public void setNumber(int number) {
-        this.number = number;
+    public double getID() {
+        return id;
     }
 
 
     public void print(){
-        System.out.print("VM No: " + number + ", CPU: "+ cpu + ", Mem: " +
+        System.out.print("VM ID: " + id + ", CPU: "+ cpu + ", Mem: " +
                 ", status: " + status + ", energy: " + calEnergy());
     }
 

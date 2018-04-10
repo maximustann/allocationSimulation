@@ -3,8 +3,15 @@ package DataCenterEntity;
 import java.util.*;
 
 public class VM implements Holder {
+
+
+    // This is a global variable. It will be incremented by 1 whenever a new VM is created
+    // This variable is useful because it prevents duplicated vmID
+    static int vmCounter = 0;
+
+
     /**
-     * @param number is the serial number of VM
+     * @param id is the serial number of VM, id starts from 1
      * @param cpu_configuration is the cpu of a certain type of VM
      * @param mem_configuration is the mem of a certain type of VM
      * @param cpu is the remained cpu of a VM
@@ -17,27 +24,28 @@ public class VM implements Holder {
      * @param containerList contains all the containers that allocated to this VM.
      */
 
-    private int number;
+    private int id;
+    private int os;
     private double cpu_configuration;
     private double mem_configuration;
     private double cpu;
     private double mem;
     private double cpu_utilization;
     private double mem_utilization;
-    private double type;
-    private double os;
+    private int type;
     private PM allocateTo;
     private ArrayList<Container> containerList;
 
 
 
-    public VM(double cpu, double mem, double type, int number) {
+    public VM(double cpu, double mem, int type, int os) {
         this.cpu_configuration = this.cpu = cpu;
         this.mem_configuration = this.mem = mem;
         this.type = type;
-        this.number = number;
         cpu_utilization = 0;
         mem_utilization = 0;
+        vmCounter += 1;
+        id = vmCounter;
     }
 
     /**
@@ -140,12 +148,8 @@ public class VM implements Holder {
         return containerList;
     }
 
-    public double getNumber() {
-        return number;
-    }
-
-    public void setNumber(int number) {
-        this.number = number;
+    public double getID() {
+        return id;
     }
 
     public double getCpu() {
@@ -164,19 +168,19 @@ public class VM implements Holder {
         this.mem = mem;
     }
 
-    public double getType() {
+    public int getType() {
         return type;
     }
 
-    public void setType(double type) {
+    public void setType(int type) {
         this.type = type;
     }
 
-    public double getOs() {
+    public int getOs() {
         return os;
     }
 
-    public void setOs(double os) {
+    public void setOs(int os) {
         this.os = os;
     }
 
@@ -189,7 +193,7 @@ public class VM implements Holder {
     }
 
     public void print(){
-        System.out.print("VM No: " + number + ", CPU: "+ cpu + ", Mem: " + mem +
-                ", OS: " + os + ", allocated to: " + allocateTo.getNumber());
+        System.out.print("VM ID: " + id + ", CPU: "+ cpu + ", Mem: " + mem +
+                ", OS: " + os + ", allocated to: " + allocateTo.getID());
     }
 }

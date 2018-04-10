@@ -1,50 +1,81 @@
 
 import FileHandlers.ReadFile;
-
 import java.io.IOException;
 import java.util.Arrays;
-
 import DataCenterEntity.*;
+import OperationInterface.*;
+import PM_Creation.SimplePM;
+import VM_Allocation.*;
+import VM_Creation.Simple;
+import VM_Selection.FirstFitSelection;
+
 public class Experiment {
     public static void main(String[] args) throws IOException {
 
 
-        // test from case N to M
+        // test from case 0 to 40
         int[] testCases = {0, 40};
+
+        // Each test case may have a different size (number of containers to be allocated)
         int[] testCaseSize = new int[40];
-//        Arrays.fill(testCaseSize, 20);
+
+        // In this case, the first 20 test cases have 20 containers, then, 40 containers
         Arrays.fill(testCaseSize, 0, 19, 20);
         Arrays.fill(testCaseSize, 20, 39, 40);
 
+        // we have 5 types of Virtual Machines (VMs)
         int vmTypes = 5;
+
+        // These are the addresses of test cases
         String base = "/home/tanboxi/workspace/BilevelData/dataset";
         String PMConfig = base + "/PMConfig.csv";
         String VMConfig = base + "/VMConfig.csv";
 
-
+        // Read files from disk
         ReadFile readFiles = new ReadFile(vmTypes, testCases, testCaseSize, PMConfig, base, VMConfig);
-//        readFiles.readVMConfig(VMConfig, vmTypes);
         double pmCpu = readFiles.getPMCpu();
         double pmMem = readFiles.getPMMem();
         double pmEnergy = readFiles.getPMEnergy();
         double[] vmMem = readFiles.getVMMem();
         double[] vmCpu = readFiles.getVMCpu();
 
+        // We set the idle Physical machine (PM) account for 70% energy consumption compared with a full PM.
+        double k = 0.7;
 
-        // Experiment starts here
+        // Four allocation strategies will be used in the experiments
+        VMCreation simple = new Simple();
+        VMAllocation ff_allocation = new FirstFitAllocation();
+        VMSelection ff_selection = new FirstFitSelection();
+        PMCreation simpleCreation = new SimplePM();
+
+
+
+
+
+        // Experiment starts here,
+        // We run the test case from 1 to N
         for(int testCase = testCases[0] + 1; testCase <= testCases[1]; ++testCase){
             System.out.println("testCase: " + testCase);
+            // For each test case, we create a new empty data center
+            DataCenter myDataCenter = new DataCenter(
+                                        pmEnergy, k, pmCpu, pmMem,
+                                        vmCpu, vmMem,
+                                        ff_allocation, ff_selection, simple, simpleCreation);
 
+
+            // We have already read all the files at the beginning.
+            // Now we just retrieve all the information from readFiles object
             double[] taskCpu = readFiles.getTaskCpu(testCase - 1);
             double[] taskMem = readFiles.getTaskMem(testCase - 1);
-            double[] taskOS = readFiles.getTaskOS(testCase - 1);
-            Container[] containers = new Container[testCases[1]];
+            int[] taskOS = readFiles.getTaskOS(testCase - 1);
 
-
-
+            // For each testCase, we need to send container one by one
+            // After each container allocation, the data center prints its energy consumption
             for(int i = 0; i < testCaseSize[testCase - 1]; ++i) {
                 System.out.println(taskCpu[i] + " : " + taskMem[i] + " : " + taskOS[i]);
-                containers[i] = new Container(taskCpu[i], taskMem[i], taskOS[i], i);
+                // ID starts from 1
+                myDataCenter.receiveContainer(new Container(taskCpu[i], taskMem[i], taskOS[i], i + 1));
+                myDataCenter.print();
             }
         }
 

@@ -1,27 +1,24 @@
 package DataCenterEntity;
 
 public class Container implements Holder {
-    private int number;
+    // id starts from 1
+    private int id;
+    private int os;
     private double cpu;
     private double mem;
-    private double os;
     private VM allocateTo;
 
 
 
-    public Container(double cpu, double mem, double os, int number) {
+    public Container(double cpu, double mem, int os, int id) {
         this.cpu = cpu;
         this.mem = mem;
         this.os = os;
-        this.number = number;
+        this.id = id;
     }
 
-    public double getNumber() {
-        return number;
-    }
-
-    public void setNumber(int number) {
-        this.number = number;
+    public int getNumber() {
+        return id;
     }
 
     public double getCpu() {
@@ -40,11 +37,11 @@ public class Container implements Holder {
         this.mem = mem;
     }
 
-    public double getOs() {
+    public int getOs() {
         return os;
     }
 
-    public void setOs(double os) {
+    public void setOs(int os) {
         this.os = os;
     }
 
@@ -66,7 +63,7 @@ public class Container implements Holder {
     }
 
     public void print(){
-        System.out.print("container No: " + number + ", CPU: "+ cpu + ", Mem: " + mem +
-                        ", OS: " + os + ", allocated to: " + allocateTo.getNumber());
+        System.out.print("container ID: " + id + ", CPU: "+ cpu + ", Mem: " + mem +
+                        ", OS: " + os + ", allocated to: " + allocateTo.getID());
     }
 }

@@ -82,8 +82,12 @@ public class ReadFile {
     public double[] getTaskMem(int testCaseNum) {
         return testCases.get(testCaseNum)[1].clone();
     }
-    public double[] getTaskOS(int testCaseNum) {
-        return testCases.get(testCaseNum)[2].clone();
+    public int[] getTaskOS(int testCaseNum) {
+//        return (int[] testCases.get(testCaseNum)[2]).clone();
+        int[] temp = new int[testCaseNum];
+        for(int i = 0; i < testCaseNum; ++i)
+            temp[i] = (int) testCases.get(testCaseNum)[2][i];
+        return temp;
     }
 
 
