@@ -17,7 +17,7 @@ public class Container implements Holder {
         this.id = id;
     }
 
-    public int getNumber() {
+    public int getID() {
         return id;
     }
 

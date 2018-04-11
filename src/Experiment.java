@@ -14,20 +14,22 @@ public class Experiment {
 
 
         // test from case 0 to 40
-        int[] testCases = {0, 40};
+        int[] testCases = {0, 1};
 
         // Each test case may have a different size (number of containers to be allocated)
-        int[] testCaseSize = new int[40];
+        int[] testCaseSize = new int[1];
+
+        testCaseSize[0] = 20;
 
         // In this case, the first 20 test cases have 20 containers, then, 40 containers
-        Arrays.fill(testCaseSize, 0, 19, 20);
-        Arrays.fill(testCaseSize, 20, 39, 40);
+//        Arrays.fill(testCaseSize, 0, 20, 20);
+//        Arrays.fill(testCaseSize, 20, 40, 40);
 
         // we have 5 types of Virtual Machines (VMs)
         int vmTypes = 5;
 
         // These are the addresses of test cases
-        String base = "/home/tanboxi/workspace/BilevelData/dataset";
+        String base = "/Users/maximustann/Work/allocationSimulation/BilevelData/dataset";
         String PMConfig = base + "/PMConfig.csv";
         String VMConfig = base + "/VMConfig.csv";
 
@@ -54,8 +56,9 @@ public class Experiment {
 
         // Experiment starts here,
         // We run the test case from 1 to N
-        for(int testCase = testCases[0] + 1; testCase <= testCases[1]; ++testCase){
-            System.out.println("testCase: " + testCase);
+        for(int testCase = testCases[0]; testCase < testCases[1]; ++testCase){
+            System.out.println("testCase: " + (testCase + 1));
+
             // For each test case, we create a new empty data center
             DataCenter myDataCenter = new DataCenter(
                                         pmEnergy, k, pmCpu, pmMem,
@@ -65,16 +68,16 @@ public class Experiment {
 
             // We have already read all the files at the beginning.
             // Now we just retrieve all the information from readFiles object
-            double[] taskCpu = readFiles.getTaskCpu(testCase - 1);
-            double[] taskMem = readFiles.getTaskMem(testCase - 1);
-            int[] taskOS = readFiles.getTaskOS(testCase - 1);
+            double[] taskCpu = readFiles.getTaskCpu(testCase);
+            double[] taskMem = readFiles.getTaskMem(testCase);
+            int[] taskOS = readFiles.getTaskOS(testCase);
 
             // For each testCase, we need to send container one by one
             // After each container allocation, the data center prints its energy consumption
-            for(int i = 0; i < testCaseSize[testCase - 1]; ++i) {
+            for(int i = 0; i < testCaseSize[testCase]; ++i) {
                 System.out.println(taskCpu[i] + " : " + taskMem[i] + " : " + taskOS[i]);
                 // ID starts from 1
-                myDataCenter.receiveContainer(new Container(taskCpu[i], taskMem[i], taskOS[i], i + 1));
+                myDataCenter.receiveContainer(new Container(taskCpu[i], taskMem[i], taskOS[i], i));
                 myDataCenter.print();
             }
         }

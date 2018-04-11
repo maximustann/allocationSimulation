@@ -13,21 +13,38 @@ public class PM implements Holder {
 
     // id starts from 1
     private int id;
+    // configuration is how PM is configured
     private double cpu_configuration;
     private double mem_configuration;
-    private double cpu;
-    private double mem;
+
+    // allocated is the resource that allocate to VMs according to VM's size
+    private double cpu_allocated;
+    private double mem_allocated;
+
+    // used is the acutual used of resources by containers
+    private double cpu_used;
+    private double mem_used;
+
+    // utilization is calculate as: used / configuration
     private double cpu_utilization;
     private double mem_utilization;
     private double status;
     private double k;
     private double maxEnergy;
     private ArrayList<VM> vmList;
+    private HashMap VMIDtoListIndex;
     private double energyConsumption;
 
     public PM(double cpu, double mem, double k, double maxEnergy) {
-        cpu_configuration = this.cpu = cpu;
-        mem_configuration = this.mem = mem;
+        cpu_configuration = cpu;
+        mem_configuration = mem;
+        cpu_used = 0;
+        mem_used = 0;
+        cpu_allocated = cpu;
+        mem_allocated = mem;
+
+        vmList = new ArrayList<>();
+        VMIDtoListIndex = new HashMap();
         this.status = status;
         this.k = k;
         this.maxEnergy = maxEnergy;
@@ -36,96 +53,129 @@ public class PM implements Holder {
     }
 
     public double calEnergy(){
-        energyConsumption = k * maxEnergy + (1 - k) * cpu_configuration * maxEnergy;
+        energyConsumption = k * maxEnergy + (1 - k) * cpu_utilization * maxEnergy;
         return energyConsumption;
     }
 
     private void updateCpuUitlization(){
-        cpu_utilization = (cpu_configuration - cpu) / cpu_configuration;
+        cpu_utilization = cpu_used / cpu_configuration;
     }
 
     private void updateMemUitlization(){
-        mem_utilization = (mem_configuration - mem) / mem_configuration;
+        mem_utilization = mem_used / mem_configuration;
     }
 
-    public void addCpu(VM vm){
-        cpu -= vm.getCpu();
+    private void addCpu(VM vm){
+        cpu_allocated -= vm.getCpu_configuration();
+        cpu_used += vm.getCpu_allocated();
         updateCpuUitlization();
     }
 
-    public void removeCpu(VM vm){
-        cpu += vm.getCpu();
+    private void removeCpu(VM vm){
+        cpu_allocated += vm.getCpu_configuration();
+        cpu_used -= vm.getCpu_allocated();
         updateCpuUitlization();
     }
 
-    public void addMem(VM vm){
-        mem -= vm.getMem();
+    private void addMem(VM vm){
+        mem_allocated -= vm.getMem_configuration();
+        mem_used += vm.getMem_allocated();
         updateMemUitlization();
     }
 
-    public void removeMem(VM vm){
-        mem += vm.getMem();
+    private void removeMem(VM vm){
+        mem_allocated += vm.getMem_configuration();
+        mem_used -= vm.getMem_allocated();
         updateMemUitlization();
+    }
+
+
+    public double getCpu_allocated(){
+        return cpu_allocated;
+    }
+
+    public double getMem_allocated(){
+        return mem_allocated;
+    }
+
+    public double getCpu_used(){
+        return cpu_used;
+    }
+    public double getMem_used(){
+        return mem_used;
+    }
+
+
+    // This method is called by VM.
+    // Whenever a new container is allocated to an hosted VM, this container bring new resource consumption
+    // Therefore, we need to update the cpu_used and mem_used
+    public void allocateNewContainer(double containerCpu, double containerMem){
+        cpu_used += containerCpu;
+        mem_used += containerMem;
+    }
+
+    // This method is called by VM after release a container.
+    public void releaseOldContainer(double containerCpu, double containerMem){
+        cpu_used -= containerCpu;
+        mem_used -= containerMem;
     }
 
 
     public ArrayList<VM> addVM(VM vm){
-        if(cpu >= vm.getCpu_configuration() && mem >= vm.getMem_configuration()) {
+        // Check if this PM has enough cpu and memory to allocate to this VM
+        // If yes, add this VM to the vmList, update utilization
+        // And update the mapping between VM ID and vmList index
+        if(cpu_allocated >= vm.getCpu_configuration() && mem_allocated >= vm.getMem_configuration()) {
+            int currentIndex = vmList.size();
             vmList.add(vm);
             addCpu(vm);
             addMem(vm);
+            VMIDtoListIndex.put(vm.getID(), currentIndex);
+
             if(vmList.size() == 1)
                 status = OPEN;
+
+
+            // If there is not enough resources
         } else {
             System.out.println("ERROR: VM allocation failed, insufficient resources");
         }
         return vmList;
     }
-    public ArrayList<VM> removeVM(double vmNum){
-        for(int i = 0; i < vmList.size(); i++){
-            if(vmList.get(i).getID() == vmNum){
-                vmList.remove(i);
-                removeCpu(vmList.get(i));
-                removeMem(vmList.get(i));
-                if(vmList.size() == 0)
-                    status = CLOSED;
-                break;
+
+
+    // We first remove the vm from vmList
+    public ArrayList<VM> removeVM(int vmID){
+        int vmIndex = (int) VMIDtoListIndex.get(vmID);
+        removeCpu(vmList.get(vmIndex));
+        removeMem(vmList.get(vmIndex));
+        vmList.remove(vmIndex);
+
+        // Then, we update the VMIDtoIndex mapping
+        Iterator entries = VMIDtoListIndex.entrySet().iterator();
+        while(entries.hasNext()){
+            Map.Entry entry = (Map.Entry) entries.next();
+            Integer key = (Integer)entry.getKey();
+            Integer value = (Integer)entry.getValue();
+            if(value > vmIndex){
+                value -= 1;
+                entry.setValue(value);
             }
         }
         return vmList;
-    }
-
-    public double getCpu() {
-        return cpu;
-    }
-
-    public void setCpu(double cpu) {
-        this.cpu = cpu;
-    }
-
-    public double getMem() {
-        return mem;
-    }
-
-    public void setMem(double mem) {
-        this.mem = mem;
     }
 
     public double getStatus() {
         return status;
     }
 
-    public void setStatus(double status) {
-        this.status = status;
-    }
-
-    public double getID() {
+    public int getID() {
         return id;
     }
 
 
     public void print(){
-        System.out.print("VM ID: " + id + ", CPU: "+ cpu + ", Mem: " +
+        System.out.println("PM ID: " + id + ", CPU: "+ cpu_used + ", Mem: " + mem_used +
                 ", status: " + status + ", energy: " + calEnergy());
     }
 

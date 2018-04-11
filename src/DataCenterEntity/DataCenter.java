@@ -35,6 +35,7 @@ public class DataCenter {
     private double[] vmCpu;
     private double[] vmMem;
     private HashMap VMIDtoListIndex;
+    private HashMap PMIDtoListIndex;
 
     // Monitor update the latest information of the data center
     public Monitor monitor;
@@ -62,6 +63,8 @@ public class DataCenter {
         this.vmSelection = vmSelection;
         this.vmCreation = vmCreation;
         this.pmCreation = pmCreation;
+        this.VMIDtoListIndex = new HashMap();
+        this.PMIDtoListIndex = new HashMap();
 
         pmList = new ArrayList<PM>();
         vmList = new ArrayList<VM>();
@@ -72,21 +75,47 @@ public class DataCenter {
     public void receiveContainer(Container container){
         int choosedVMID = vmSelection.execute(vmList, container);
 
-        /* If there is no suitable VM to select, then we will need to create a new one */
+        // If there is no suitable VM to select, then we will need to create a new one
         if(choosedVMID == 0){
+
             // We create a new VM and add it to the vmList
             VM vm = vmCreation.execute(vmCpu, vmMem, container);
+            int currentVMnum = vmList.size();
             vmList.add(vm);
 
+            // We map VM ID and its index in the vmList
+            VMIDtoListIndex.put(vm.getID(), currentVMnum);
+
             // After we created the vm, we will need to allocate it to a PM, and if there is no suitable PM,
-            // We must create a new PM to accommodate
-            if(vmAllocation.execute(pmList, vm) == 0){
-                PM pm = pmCreation.execute(pmCpu, pmMem, pmList.size(), k, maxEnergy);
+            // We must create a new PM to accommodate and add the PM to pmList
+            int choosedPMID = vmAllocation.execute(pmList, vm);
+            if(choosedPMID == 0){
+                PM pm = pmCreation.execute(pmCpu, pmMem, k, maxEnergy);
+                int currentPMnum = pmList.size();
                 pm.addVM(vm);
+                pmList.add(pm);
+
+                // We map PM ID and its index in the pmList
+                PMIDtoListIndex.put(pm.getID(), currentPMnum);
+
+                // Allocate to an existing PM
+            } else{
+
+                // First, we look for PM's index in the list
+                // Then, we retrieve it from the list
+                // Finally, we add the VM to the PM.
+                PM choosedPM = pmList.get((int) PMIDtoListIndex.get(choosedPMID));
+                choosedPM.addVM(vm);
+
             }
             // If there is a suitable VM, then allocate to this VM
         } else{
-//            vmList.get()
+
+            // First, we look for VM's index in the list
+            // Then, we retrieve it from the list
+            // Finally, we add the container to the VM.
+            VM choosedVM = vmList.get((int) VMIDtoListIndex.get(choosedVMID));
+            choosedVM.addContainer(container);
         }
     }
 
@@ -101,7 +130,10 @@ public class DataCenter {
 
     // Print the state of the data center
     public void print(){
-        System.out.println("Total energy: " + calEnergy());
+//        System.out.println("Total energy: " + calEnergy());
+        for(PM pm:pmList){
+            pm.print();
+        }
     }
 
 

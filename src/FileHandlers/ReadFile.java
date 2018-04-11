@@ -5,7 +5,7 @@ public class ReadFile {
     private ReadCsvFile readByRow;
     private ReadCsvFile readByCol;
 
-    private double[] testCaseNum;
+    private int[] testCaseSize;
     private double VMTypes;
     private double PMCpu;
     private double PMMem;
@@ -15,7 +15,6 @@ public class ReadFile {
     private double[] VMCpu;
     private double[] VMMem;
     private ArrayList<double[][]> testCases;
-//    private double[][] testCase;
 
     public ReadFile(
             int VMTypes,
@@ -27,6 +26,7 @@ public class ReadFile {
     ) {
 
         this.testCases = new ArrayList<>();
+        this.testCaseSize = testCaseSize.clone();
 
         readByRow = new ReadByRow();
         readByCol = new ReadByCol();
@@ -49,9 +49,9 @@ public class ReadFile {
             VMMem[i] = VMConfig[i][1];
         }
 
-        for(int i = testCaseNum[0] + 1; i <= testCaseNum[1]; ++i) {
-            double[][] testCase = new double[3][testCaseSize[i - 1]];
-            String testCasePath = base +  "/testCase" + i + ".csv";
+        for(int i = testCaseNum[0]; i < testCaseNum[1]; ++i) {
+            double[][] testCase = new double[3][testCaseSize[i]];
+            String testCasePath = base +  "/testCase" + (i + 1) + ".csv";
             readByCol.read(testCasePath, testCase);
             testCases.add(testCase);
         }
@@ -84,10 +84,10 @@ public class ReadFile {
     }
     public int[] getTaskOS(int testCaseNum) {
 //        return (int[] testCases.get(testCaseNum)[2]).clone();
-        int[] temp = new int[testCaseNum];
+        int[] temp = new int[testCaseSize[testCaseNum]];
         for(int i = 0; i < testCaseNum; ++i)
             temp[i] = (int) testCases.get(testCaseNum)[2][i];
-        return temp;
+        return temp.clone();
     }
 
 
