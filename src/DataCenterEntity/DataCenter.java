@@ -80,6 +80,8 @@ public class DataCenter {
 
             // We create a new VM and add it to the vmList
             VM vm = vmCreation.execute(vmCpu, vmMem, container);
+            System.out.println("Create VM branch");
+            vm.addContainer(container);
             int currentVMnum = vmList.size();
             vmList.add(vm);
 
@@ -94,6 +96,7 @@ public class DataCenter {
                 int currentPMnum = pmList.size();
                 pm.addVM(vm);
                 pmList.add(pm);
+
 
                 // We map PM ID and its index in the pmList
                 PMIDtoListIndex.put(pm.getID(), currentPMnum);
@@ -115,6 +118,7 @@ public class DataCenter {
             // Then, we retrieve it from the list
             // Finally, we add the container to the VM.
             VM choosedVM = vmList.get((int) VMIDtoListIndex.get(choosedVMID));
+            System.out.println("Select VM branch");
             choosedVM.addContainer(container);
         }
     }

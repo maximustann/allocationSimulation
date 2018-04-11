@@ -117,6 +117,11 @@ public class VM implements Holder {
         updateMemUtilization();
     }
 
+    // This method is called by the host PM
+    public void setAllocateTo(PM pm){
+        allocateTo = pm;
+    }
+
 
     /**
      * @param container The container that wants to deploy in this VM
@@ -124,6 +129,7 @@ public class VM implements Holder {
      *
      */
     public ArrayList<Container> addContainer(Container container){
+        System.out.println("OS: " + os);
         // First, we check if the VM has installed an OS
         // If there is no existing OS, then further check the remain CPU and Mem
         // If there is no OS, that means this VM has not been allocated to a PM yet.
@@ -133,12 +139,16 @@ public class VM implements Holder {
                 addCpu(container);
                 addMem(container);
 
+                // call container to init allocateTo
+                container.setAllocateTo(this);
+
                 // update mapping
                 int currentIndex = containerList.size();
                 containerIDtoIndex.put(container.getID(), currentIndex);
 
                 // setup OS
                 os = container.getOs();
+                System.out.println("After OS: " + os);
             } else {
                 System.out.println("ERROR: container allocation failed, insufficient resources");
             }
@@ -146,6 +156,7 @@ public class VM implements Holder {
         } else {
             // Check if the OS is compatiable with the container
             if(os == container.getOs()){
+
                 // If there is enough resources. Allocate this container.
                 // If there is an OS, that means this VM has been allocated to a PM.
                 if(cpu_remain >= container.getCpu() && mem_remain >= container.getMem()){
@@ -153,7 +164,11 @@ public class VM implements Holder {
                     addCpu(container);
                     addMem(container);
 
+                    // call container to init allocateTo
+                    container.setAllocateTo(this);
+
                     // call PM to update its utilization
+                    System.out.println("Call host PM ID：" + allocateTo.getID());
                     allocateTo.allocateNewContainer(container.getCpu(), container.getMem());
 
                     // update mapping
@@ -163,6 +178,7 @@ public class VM implements Holder {
                 // Else, the OS is not compatible with the VM
             } else {
                 System.out.println("ERROR: OS is not compatiable");
+                return null;
             }
         }
         return containerList;
@@ -173,6 +189,10 @@ public class VM implements Holder {
         Container container = containerList.get(containerIndex);
         removeCpu(container);
         removeMem(container);
+
+        // call container to detach
+        container.detach();
+
         // call the host PM to update its utilization
         allocateTo.releaseOldContainer(container.getCpu(), container.getMem());
         containerList.remove(containerIndex);
@@ -193,6 +213,10 @@ public class VM implements Holder {
 
     public double getCpu_allocated() {
         return cpu_allocated;
+    }
+
+    public void detach(){
+        setAllocateTo(null);
     }
 
 
@@ -226,10 +250,6 @@ public class VM implements Holder {
 
     public PM getAllocateTo() {
         return allocateTo;
-    }
-
-    public void setAllocateTo(PM allocateTo) {
-        this.allocateTo = allocateTo;
     }
 
     public void print(){

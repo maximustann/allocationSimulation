@@ -50,8 +50,12 @@ public class Container implements Holder {
         return allocateTo;
     }
 
-    public void setAllocateTo(VM allocateTo) {
-        this.allocateTo = allocateTo;
+    public void detach(){
+        setAllocateTo(null);
+    }
+
+    public void setAllocateTo(VM vm) {
+        this.allocateTo = vm;
     }
 
     public double getCpu_configuration() {

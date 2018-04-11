@@ -17,19 +17,22 @@ public class FirstFitSelection implements VMSelection {
         }
 
         // Look for the VM which has sufficient resources on 2 dimensions
-        // add the container into its local vmList
         // return the VM's ID
         for(int i = 0; i < vmList.size(); ++i){
             // If the current vm has enough resource and the OS is compatible with
             // the container
+
             if(vmList.get(i).getCpu_remain() >= container.getCpu_configuration() &&
                     vmList.get(i).getMem_remain() >= container.getMem_configuration() &&
                     vmList.get(i).getOs() == container.getOs()){
-                vmList.get(i).addContainer(container);
+                System.out.println("VM OS: " + vmList.get(i).getOs() + ", container OS: " + container.getOs());
                 choosedVMID = vmList.get(i).getID();
+                System.out.println("Select a VM ID : " + choosedVMID);
+                break;
             } // End If
         } // End for
 
-        return choosedVMID;
+        // No suitable VM exists
+        return 0;
     }
 }

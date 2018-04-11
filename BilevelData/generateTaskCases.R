@@ -49,9 +49,9 @@ generateTask <- function(size, testCase){
 
 	for(i in seq(size)){
 		u <- runif(1)
-		if(u < os1) osTypes[i] <- 0
-		else if((u >= os1) && (u < os2)) osTypes[i] <- 1
-		else osTypes[i] <- 2
+		if(u < os1) osTypes[i] <- 1
+		else if((u >= os1) && (u < os2)) osTypes[i] <- 2
+		else osTypes[i] <- 3
 	}
 
 	testCaseData <- cbind(taskA, taskM, osTypes)

@@ -83,10 +83,10 @@ public class ReadFile {
         return testCases.get(testCaseNum)[1].clone();
     }
     public int[] getTaskOS(int testCaseNum) {
-//        return (int[] testCases.get(testCaseNum)[2]).clone();
         int[] temp = new int[testCaseSize[testCaseNum]];
-        for(int i = 0; i < testCaseNum; ++i)
+        for(int i = 0; i < testCaseSize[testCaseNum]; ++i) {
             temp[i] = (int) testCases.get(testCaseNum)[2][i];
+        }
         return temp.clone();
     }
 

@@ -110,14 +110,20 @@ public class PM implements Holder {
     // Whenever a new container is allocated to an hosted VM, this container bring new resource consumption
     // Therefore, we need to update the cpu_used and mem_used
     public void allocateNewContainer(double containerCpu, double containerMem){
+        System.out.println("Before allocate a container, cpu_used: " + cpu_used);
         cpu_used += containerCpu;
         mem_used += containerMem;
+        updateCpuUitlization();
+        updateMemUitlization();
+        System.out.println("After allocate a container, cpu_used: " + cpu_used);
     }
 
     // This method is called by VM after release a container.
     public void releaseOldContainer(double containerCpu, double containerMem){
         cpu_used -= containerCpu;
         mem_used -= containerMem;
+        updateCpuUitlization();
+        updateMemUitlization();
     }
 
 
@@ -131,6 +137,9 @@ public class PM implements Holder {
             addCpu(vm);
             addMem(vm);
             VMIDtoListIndex.put(vm.getID(), currentIndex);
+
+            // call VM to add the host PM to its allocateTo
+            vm.setAllocateTo(this);
 
             if(vmList.size() == 1)
                 status = OPEN;
@@ -147,8 +156,12 @@ public class PM implements Holder {
     // We first remove the vm from vmList
     public ArrayList<VM> removeVM(int vmID){
         int vmIndex = (int) VMIDtoListIndex.get(vmID);
-        removeCpu(vmList.get(vmIndex));
-        removeMem(vmList.get(vmIndex));
+        VM vm = vmList.get(vmIndex);
+        removeCpu(vm);
+        removeMem(vm);
+
+        // call the VM to detach
+        vm.detach();
         vmList.remove(vmIndex);
 
         // Then, we update the VMIDtoIndex mapping
