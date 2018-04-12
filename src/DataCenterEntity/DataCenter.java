@@ -34,8 +34,11 @@ public class DataCenter {
     private double pmMem;
     private double[] vmCpu;
     private double[] vmMem;
+
+    // These two HashMaps map ID to their index in the list.
     private HashMap VMIDtoListIndex;
     private HashMap PMIDtoListIndex;
+
 
     // Monitor update the latest information of the data center
     public Monitor monitor;
@@ -69,6 +72,7 @@ public class DataCenter {
         pmList = new ArrayList<PM>();
         vmList = new ArrayList<VM>();
 
+
     }
 
     // This method is called when new container comes
@@ -78,9 +82,11 @@ public class DataCenter {
         // If there is no suitable VM to select, then we will need to create a new one
         if(choosedVMID == 0){
 
-            // We create a new VM and add it to the vmList
-            VM vm = vmCreation.execute(vmCpu, vmMem, container);
             System.out.println("Create VM branch");
+            // 1. We create a new VM
+            // 2. Add the container to the new VM
+            // 3. Add the new VM to the vmList
+            VM vm = vmCreation.execute(vmCpu, vmMem, container);
             vm.addContainer(container);
             int currentVMnum = vmList.size();
             vmList.add(vm);

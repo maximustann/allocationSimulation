@@ -29,7 +29,8 @@ public class Experiment {
         int vmTypes = 5;
 
         // These are the addresses of test cases
-        String base = "/Users/maximustann/Work/allocationSimulation/BilevelData/dataset";
+//        String base = "/Users/maximustann/Work/allocationSimulation/BilevelData/dataset";
+        String base = "/home/tanboxi/workspace/containerAllocation/BilevelData/dataset";
         String PMConfig = base + "/PMConfig.csv";
         String VMConfig = base + "/VMConfig.csv";
 
@@ -84,8 +85,6 @@ public class Experiment {
 
 
 //        WriteFileBilevel writeFiles = new WriteFileBilevel(fitnessAddr, timeAddr);
-
-
 
 
         System.out.println("Done!");
