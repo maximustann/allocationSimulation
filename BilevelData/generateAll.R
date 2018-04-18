@@ -3,10 +3,11 @@ set.seed(1)
 generateAll <- function(){
 	
 	testCase <- 100
-	size <- c(rep(20,20) , rep(40, 20), rep(60, 20), rep(80, 20), rep(100, 20))
+	#size <- c(rep(20,20) , rep(40, 20), rep(60, 20), rep(80, 20), rep(100, 20))
+	size <- c(rep(1000, 100))
 	#VMtypes <- 5
 	base <- paste("./testCase")
-	for(i in seq(testCase)){
-		generateTask(size[i], i)
+	for(i in 101:200){
+		generateTask(size[i-100], i)
 	}
 }
