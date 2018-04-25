@@ -9,13 +9,19 @@ public class VM implements Holder {
     // This variable is useful because it prevents duplicated vmID
     static int vmCounter = 0;
 
+    // We fix the overhead of CPU and MEM according to Mann's paper
+    public static double CPU_OVERHEAD_RATE = 0.1;
+    public static double MEM_OVERHEAD = 200;
+
 
     /**
      * @param id is the serial number of VM, id starts from 1
      * @param cpu_configuration is the cpu of a certain type of VM
      * @param mem_configuration is the mem of a certain type of VM
-     * @param cpu is the remained cpu of a VM
-     * @param mem is the remained mem of a VM
+     * @param cpu_used is the cpu that has been used. Include all the containers and VM overhead.
+     * @param mem_used is the cpu that has been used. Include all the containers and VM overhead.
+     * @param cpu_remain = cpu_configuration - cpu_used
+     * @param mem_remain = mem_configuration - mem_used
      * @param cpu_utilization is the cpu utilization of the current VM
      * @param mem_utilization is the mem utilization of the current VM
      * @param type is the type of VM
@@ -28,8 +34,8 @@ public class VM implements Holder {
     private int os = 0;
     private double cpu_configuration;
     private double mem_configuration;
-    private double cpu_allocated;
-    private double mem_allocated;
+    private double cpu_used;
+    private double mem_used;
     private double cpu_remain;
     private double mem_remain;
     private double cpu_utilization;
@@ -42,15 +48,26 @@ public class VM implements Holder {
 
 
     public VM(double cpu, double mem, int type) {
-        this.cpu_configuration = this.cpu_remain = cpu;
-        this.mem_configuration = this.mem_remain = mem;
-        cpu_allocated = 0;
-        mem_allocated = 0;
+        // initialize cpu and memory configuration
+        this.cpu_configuration = cpu;
+        this.mem_configuration = mem;
+
+        // cpu and mem are used from the creation of the VM
+        cpu_used = cpu_configuration * CPU_OVERHEAD_RATE;
+        mem_used = MEM_OVERHEAD;
+        cpu_remain = cpu_configuration - cpu_used;
+        mem_remain = mem_configuration - mem_used;
+
+        // utilization
+        cpu_utilization = cpu_used / cpu_configuration;
+        mem_utilization = mem_used / mem_configuration;
+
+        // create the list and mapping for containers
         containerList = new ArrayList<>();
         containerIDtoIndex = new HashMap();
         this.type = type;
-        cpu_utilization = 0;
-        mem_utilization = 0;
+
+        // the global vm counter increment by 1
         vmCounter += 1;
         id = vmCounter;
     }
@@ -59,11 +76,14 @@ public class VM implements Holder {
      * calculate the current cpu utilization.
      */
     private void updateCpuUtilization(){
-        cpu_utilization = cpu_allocated / cpu_configuration;
+        cpu_utilization = cpu_used / cpu_configuration;
     }
 
+    /**
+     * calculate the current mem utilization.
+     */
     private void updateMemUtilization(){
-        cpu_utilization = mem_allocated / cpu_configuration;
+        mem_utilization = mem_used / mem_configuration;
     }
 
     public double getCpu_configuration() {
@@ -74,28 +94,32 @@ public class VM implements Holder {
         return mem_configuration;
     }
 
+    // First update, then return the utilization
     public double getCpu_utilization() {
+        updateCpuUtilization();
         return cpu_utilization;
     }
 
-
+    // First update, then return the utilization
     public double getMem_utilization() {
+        updateMemUtilization();
         return mem_utilization;
     }
+
 
     /**
      * @param container
      * calculate the remained cpu as well as update the cpu utilization
      */
     private void addCpu(Container container){
-        cpu_remain -= container.getCpu();
-        cpu_allocated += container.getCpu();
+        cpu_remain -= container.getCpu_used();
+        cpu_used += container.getCpu_used();
         updateCpuUtilization();
     }
 
     private void removeCpu(Container container){
-        cpu_remain += container.getCpu();
-        cpu_allocated -= container.getCpu();
+        cpu_remain += container.getCpu_used();
+        cpu_used -= container.getCpu_used();
         updateCpuUtilization();
     }
 
@@ -104,16 +128,15 @@ public class VM implements Holder {
      * @param container
      * calculate the remained mem as well as update the mem utilization
      */
-
     private void addMem(Container container){
-        mem_remain -= container.getMem();
-        mem_allocated += container.getMem();
+        mem_remain -= container.getMem_used();
+        mem_used += container.getMem_used();
         updateMemUtilization();
     }
 
     private void removeMem(Container container){
-        mem_remain += container.getMem();
-        mem_allocated -= container.getMem();
+        mem_remain += container.getMem_used();
+        mem_used -= container.getMem_used();
         updateMemUtilization();
     }
 
@@ -129,12 +152,12 @@ public class VM implements Holder {
      *
      */
     public ArrayList<Container> addContainer(Container container){
-        System.out.println("OS: " + os);
+//        System.out.println("OS: " + os);
         // First, we check if the VM has installed an OS
         // If there is no existing OS, then further check the remain CPU and Mem
         // If there is no OS, that means this VM has not been allocated to a PM yet.
         if(os == 0) {
-            if (cpu_remain >= container.getCpu() && mem_remain >= container.getMem()) {
+            if (cpu_remain >= container.getCpu_used() && mem_remain >= container.getMem_used()) {
                 containerList.add(container);
                 addCpu(container);
                 addMem(container);
@@ -148,7 +171,7 @@ public class VM implements Holder {
 
                 // setup OS
                 os = container.getOs();
-                System.out.println("After OS: " + os);
+//                System.out.println("After OS: " + os);
             } else {
                 System.out.println("ERROR: container allocation failed, insufficient resources");
             }
@@ -159,7 +182,7 @@ public class VM implements Holder {
 
                 // If there is enough resources. Allocate this container.
                 // If there is an OS, that means this VM has been allocated to a PM.
-                if(cpu_remain >= container.getCpu() && mem_remain >= container.getMem()){
+                if(cpu_remain >= container.getCpu_used() && mem_remain >= container.getMem_used()){
                     containerList.add(container);
                     addCpu(container);
                     addMem(container);
@@ -168,8 +191,8 @@ public class VM implements Holder {
                     container.setAllocateTo(this);
 
                     // call PM to update its utilization
-                    System.out.println("Call host PM ID：" + allocateTo.getID());
-                    allocateTo.allocateNewContainer(container.getCpu(), container.getMem());
+//                    System.out.println("Call host PM ID：" + allocateTo.getID());
+                    allocateTo.allocateNewContainer(container.getCpu_used(), container.getMem_used());
 
                     // update mapping
                     int currentIndex = containerList.size();
@@ -184,6 +207,7 @@ public class VM implements Holder {
         return containerList;
     }
 
+
     public ArrayList<Container> removeContainer(double containerID){
         int containerIndex = (int) containerIDtoIndex.get(containerID);
         Container container = containerList.get(containerIndex);
@@ -194,10 +218,11 @@ public class VM implements Holder {
         container.detach();
 
         // call the host PM to update its utilization
-        allocateTo.releaseOldContainer(container.getCpu(), container.getMem());
+        allocateTo.releaseOldContainer(container.getCpu_used(), container.getMem_used());
         containerList.remove(containerIndex);
 
-        // Then, we update the mapping
+        // Then, we update the mapping: All the containers behind the left container will need to be adjusted.
+        // Their index in the containerList will decrease by 1.
         Iterator entries = containerIDtoIndex.entrySet().iterator();
         while(entries.hasNext()){
             Map.Entry entry = (Map.Entry) entries.next();
@@ -211,27 +236,34 @@ public class VM implements Holder {
         return containerList;
     }
 
-    public double getCpu_allocated() {
-        return cpu_allocated;
+    // get cpu_used
+    public double getCpu_used() {
+        return cpu_used;
     }
 
+    // get mem_used
+    public double getMem_used() {
+        return mem_used;
+    }
+
+    // set the allocatedTo to null
     public void detach(){
         setAllocateTo(null);
     }
 
 
-    public double getMem_allocated() {
-        return mem_allocated;
-    }
 
+    // get cpu remained
     public double getCpu_remain() {
         return cpu_remain;
     }
 
+    // get mem remained
     public double getMem_remain() {
         return mem_remain;
     }
 
+    // get type
     public int getType() {
         return type;
     }
@@ -240,6 +272,7 @@ public class VM implements Holder {
         this.type = type;
     }
 
+    // get OS
     public int getOs() {
         return os;
     }
@@ -248,16 +281,21 @@ public class VM implements Holder {
         this.os = os;
     }
 
+    // get the PM that allocated to
     public PM getAllocateTo() {
         return allocateTo;
     }
 
     public void print(){
-        System.out.print("VM ID: " + id + ", CPU: "+ cpu_allocated + ", Mem: " + mem_allocated +
-                ", OS: " + os + ", allocated to: " + allocateTo.getID());
+        System.out.println("VM ID: " + id + ", CPU: "+ cpu_used + ", Mem: " + mem_used +
+                ", OS: " + os);
     }
 
     public int getID() {
         return id;
+    }
+
+    public static void resetCounter(){
+        vmCounter = 0;
     }
 }

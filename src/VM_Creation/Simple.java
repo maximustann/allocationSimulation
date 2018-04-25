@@ -2,6 +2,7 @@ package VM_Creation;
 import DataCenterEntity.*;
 import OperationInterface.VMCreation;
 
+
 import java.util.*;
 
 public class Simple implements VMCreation {
@@ -20,7 +21,9 @@ public class Simple implements VMCreation {
         for(int i = 0; i < vmCpu.length; ++i){
 
             // If this vm is capable to host the container
-            if(vmCpu[i] >= container.getCpu() && vmMem[i] >= container.getMem()){
+            // include the container's resource requirement and the VM overhead
+            if(vmCpu[i] >= (container.getCpu_used() + VM.CPU_OVERHEAD_RATE * vmCpu[i])
+                        && vmMem[i] >= (container.getMem_used() + VM.MEM_OVERHEAD)){
 
                 // We create a new vm in this type i
                 vm = new VM(vmCpu[i], vmMem[i], i);

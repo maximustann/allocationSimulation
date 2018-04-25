@@ -8,19 +8,44 @@ import java.util.ArrayList;
 
 /**
  * FirstFitSelection is a bin packing algorithm.
- * In this implementation, we implemented a First Fit Decreasing.
+ *
+ * In a general form, a heuristic algorithm can be represented as
+ * A(N, R, M, S, W, P)
+ *
+ * N is the number of items
+ * R is the number of items that need to be packed when refill the queue,  1 <= R <= N
+ * M is the number of bins
+ * S is the number of bins that need to be shipped when no item can fit into current bins
+ * W is the preprocessing (sorting) algorithm
+ * P is the packing rule
+ *
+ *
+ * So, the first fit algorithm can be represented in a general form as
+ * A(1, 1, n, n, W0, PG) which means
+ *
+ * Every arrival container will be allocated immediately.
+ * There is n number of VM exists and to be considered.
+ *
+ *
+ * W0 represents that the item will be First-come-First-serve.
+ * No sorting preprocess on the items.
+ * PG means packing rule is global:
+ *
+ * The global means, we will exam VM one by one from the beginning of the vmList until we find
+ * a VM which has enough resource to hold the current container.
  *
  *
  * Algorithm Description:
- * 1. Sort the vmList in a decreasing order according to their remain resources
- * 2. Select the first VM that has sufficient resources
+ * 1. Check if there is enough resources on the VM start from the beginning of the vmList
+ * 2. Allocate the container to the first VM that has the enough resource
+ *
  *
  * Notice that, this implementation returns the VM ID instead of the VM itself.
  * Also, this algorithm only select the VM ID.
  * The algorithm does not allocate container to the selected VM.
  * We leave the allocation functionality to DataCenter
  *
- * If there is no capable VM, return 0 which means no suitable VM exists;
+ * If there is no capable VM, return 0 which means no suitable VM exists.
  *
  */
 public class FirstFitSelection implements VMSelection {
@@ -30,8 +55,6 @@ public class FirstFitSelection implements VMSelection {
         // all ID starts from 1, therefore, 0 means NO suitable VM exists.
         int choosedVMID = 0;
 
-        // We sort VM in this list so that it won't mess up the original one.
-        ArrayList<VM> sortedVMList;
 
         // No VM exists yet. Return 0
         if(vmList.isEmpty()) {
@@ -48,14 +71,13 @@ public class FirstFitSelection implements VMSelection {
             if(vmList.get(i).getCpu_remain() >= container.getCpu_configuration() &&
                     vmList.get(i).getMem_remain() >= container.getMem_configuration() &&
                     vmList.get(i).getOs() == container.getOs()){
-                System.out.println("VM OS: " + vmList.get(i).getOs() + ", container OS: " + container.getOs());
+//                System.out.println("VM OS: " + vmList.get(i).getOs() + ", container OS: " + container.getOs());
                 choosedVMID = vmList.get(i).getID();
-                System.out.println("Select a VM ID : " + choosedVMID);
+//                System.out.println("Select a VM ID : " + choosedVMID);
                 break;
             } // End If
         } // End for
 
-        // No suitable VM exists
-        return 0;
+        return choosedVMID;
     }
 }

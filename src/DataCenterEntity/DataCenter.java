@@ -82,12 +82,13 @@ public class DataCenter {
         // If there is no suitable VM to select, then we will need to create a new one
         if(choosedVMID == 0){
 
-            System.out.println("Create VM branch");
+//            System.out.println("Create VM branch");
             // 1. We create a new VM
             // 2. Add the container to the new VM
             // 3. Add the new VM to the vmList
             VM vm = vmCreation.execute(vmCpu, vmMem, container);
             vm.addContainer(container);
+//            vm.print();
             int currentVMnum = vmList.size();
             vmList.add(vm);
 
@@ -124,8 +125,9 @@ public class DataCenter {
             // Then, we retrieve it from the list
             // Finally, we add the container to the VM.
             VM choosedVM = vmList.get((int) VMIDtoListIndex.get(choosedVMID));
-            System.out.println("Select VM branch");
+//            System.out.println("Select VM branch");
             choosedVM.addContainer(container);
+//            choosedVM.print();
         }
     }
 

@@ -1,7 +1,8 @@
-package Multi_Resource_Handling;
+package Preprocessing;
 import  DataCenterEntity.*;
 
-public interface MultiResource {
+
+public interface PreprocessingMethod {
     // Transform multi resource into one scalar
-    public double tranform(Holder bin);
+    public double tranform(double cpu, double mem);
 }
