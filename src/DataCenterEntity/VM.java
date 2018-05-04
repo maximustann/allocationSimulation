@@ -94,6 +94,18 @@ public class VM implements Holder {
         return mem_configuration;
     }
 
+    public int getContainerNum(){
+        return containerList.size();
+    }
+
+    public double getBalance(){
+        double balance = 0;
+        if(cpu_utilization >= mem_utilization)
+            balance = cpu_utilization / mem_utilization;
+        else balance = mem_utilization / cpu_utilization;
+        return balance;
+    }
+
     // First update, then return the utilization
     public double getCpu_utilization() {
         updateCpuUtilization();

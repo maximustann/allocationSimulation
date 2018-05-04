@@ -5,6 +5,7 @@ import OperationInterface.VMAllocation;
 import OperationInterface.VMCreation;
 import OperationInterface.VMSelection;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -34,6 +35,7 @@ public class DataCenter {
     private double pmMem;
     private double[] vmCpu;
     private double[] vmMem;
+    private String base;
 
     // These two HashMaps map ID to their index in the list.
     private HashMap VMIDtoListIndex;
@@ -45,6 +47,7 @@ public class DataCenter {
 
     // We initialize these parameters when the datacenter is created
     public DataCenter(
+            String base,
             double maxEnergy,
             double k,
             double pmCpu,
@@ -68,6 +71,9 @@ public class DataCenter {
         this.pmCreation = pmCreation;
         this.VMIDtoListIndex = new HashMap();
         this.PMIDtoListIndex = new HashMap();
+        this.base = base;
+        monitor = new Monitor();
+
 
         pmList = new ArrayList<PM>();
         vmList = new ArrayList<VM>();
@@ -82,13 +88,13 @@ public class DataCenter {
         // If there is no suitable VM to select, then we will need to create a new one
         if(choosedVMID == 0){
 
-//            System.out.println("Create VM branch");
+            System.out.println("Create VM branch");
             // 1. We create a new VM
             // 2. Add the container to the new VM
             // 3. Add the new VM to the vmList
             VM vm = vmCreation.execute(vmCpu, vmMem, container);
             vm.addContainer(container);
-//            vm.print();
+            vm.print();
             int currentVMnum = vmList.size();
             vmList.add(vm);
 
@@ -127,7 +133,13 @@ public class DataCenter {
             VM choosedVM = vmList.get((int) VMIDtoListIndex.get(choosedVMID));
 //            System.out.println("Select VM branch");
             choosedVM.addContainer(container);
-//            choosedVM.print();
+        }
+        // Recording happen in every 20 allocations
+        int testCase = container.getID() + 1;
+        if(testCase  % 20 == 0){
+            File bF = new File(base + testCase + "/");
+            if(!bF.exists()) bF.mkdir();
+            monitor.writeStatusFiles(base + testCase + "/", pmList);
         }
     }
 

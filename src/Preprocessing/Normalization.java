@@ -1,5 +1,5 @@
 package Preprocessing;
 
 public interface Normalization {
-    public double[] normalize(double cpu, double mem);
+    public double[] normalize(double cpu, double mem, int vmType);
 }

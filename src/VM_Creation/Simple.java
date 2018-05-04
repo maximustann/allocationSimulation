@@ -25,7 +25,7 @@ public class Simple implements VMCreation {
             if(vmCpu[i] >= (container.getCpu_used() + VM.CPU_OVERHEAD_RATE * vmCpu[i])
                         && vmMem[i] >= (container.getMem_used() + VM.MEM_OVERHEAD)){
 
-                // We create a new vm in this type i
+                // We create a new vm in this type i, starts from 0
                 vm = new VM(vmCpu[i], vmMem[i], i);
                 System.out.println("create a VM cpu: " + vmCpu[i] + ", mem: " + vmMem[i]);
 

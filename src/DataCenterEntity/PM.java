@@ -57,6 +57,21 @@ public class PM implements Holder {
         id = pmCounter;
     }
 
+    // Balance should always be in [0, 1]
+    public double getBalance(){
+        double balance = 0;
+        if(cpu_utilization >= mem_utilization)
+            balance = mem_utilization / cpu_utilization;
+        else balance = cpu_utilization / mem_utilization;
+        return balance;
+    }
+
+
+    // return the number of VMs
+    public int vmNum(){
+        return vmList.size();
+    }
+
     public static void resetCounter(){
         pmCounter = 0;
     }
@@ -77,6 +92,14 @@ public class PM implements Holder {
         mem_utilization = mem_used / mem_configuration;
     }
 
+    public double getCpu_utilization() {
+        return cpu_utilization;
+    }
+
+    public double getMem_utilization() {
+        return mem_utilization;
+    }
+
     // add VM, update CPU
     private void addCpu(VM vm){
         // cpu_remain to the VM is NOT the actual use of the CPU resource. It is a constraint.
@@ -84,6 +107,7 @@ public class PM implements Holder {
 
         // cpu_used is the actual used of VM which includes all the containers and overhead of the VM
         cpu_used += vm.getCpu_used();
+//        System.out.println("After add: " + cpu_remain);
 
         // update CPU utilization
         updateCpuUitlization();
@@ -111,12 +135,12 @@ public class PM implements Holder {
     }
 
     // get cpu_remain
-    public double getCpu_allocated(){
+    public double getCpu_remain(){
         return cpu_remain;
     }
 
     // get mem_remain
-    public double getMem_allocated(){
+    public double getMem_remain(){
         return mem_remain;
     }
 
@@ -225,11 +249,14 @@ public class PM implements Holder {
 
 
     public void print(){
-        System.out.println("PM ID: " + id + ", CPU: "+ cpu_used + ", Mem: " + mem_used +
-                ", CPU remain: " + cpu_remain + ", Mem remain: " + mem_remain +
+        System.out.println("PM ID: " + id +
+                ", CPU: "+ Math.round(cpu_used * 100) / 100.0 +
+                ", Mem: " + Math.round(mem_used * 100) / 100.0 +
+                ", CPU remain: " + Math.round(cpu_remain * 100) / 100.0 +
+                ", Mem remain: " + Math.round(mem_remain * 100) / 100.0 +
                 ", CPU utilization: " + Math.round(cpu_utilization * 10000) / 10000.0 +
                 ", Mem utilization: " + Math.round(mem_utilization * 10000) / 10000.0 +
-                ", status: " + status + ", energy: " + Math.round(calEnergy() * 100) / 100.0);
+                ", energy: " + Math.round(calEnergy() * 100) / 100.0);
 //        for(VM vm:vmList) vm.print();
     }
 
@@ -239,5 +266,9 @@ public class PM implements Holder {
 
     public double getMem_configuration() {
         return mem_configuration;
+    }
+
+    public ArrayList getVMList(){
+        return vmList;
     }
 }

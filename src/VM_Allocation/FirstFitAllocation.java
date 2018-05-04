@@ -64,8 +64,8 @@ public class FirstFitAllocation implements VMAllocation{
         // add the VM into its local vmList
         // return the PM's ID
         for(int i = 0; i < pmList.size(); ++i){
-            if(pmList.get(i).getCpu_allocated() >= vm.getCpu_configuration() &&
-                    pmList.get(i).getMem_allocated() >= vm.getMem_configuration()){
+            if(pmList.get(i).getCpu_remain() >= vm.getCpu_configuration() &&
+                    pmList.get(i).getMem_remain() >= vm.getMem_configuration()){
                 choosePMID = pmList.get(i).getID();
 //                System.out.println("Select a PM ID: " + choosePMID);
                 break;

@@ -52,9 +52,6 @@ public class WriteByRow implements WriteCsvFile {
 		try {
 			file = new File(fileName);
 		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		if(!file.exists()){
 			file.createNewFile();
 		}
 

@@ -2,7 +2,7 @@ package VM_Selection;
 import java.util.*;
 import OperationInterface.VMSelection;
 import DataCenterEntity.*;
-import Preprocessing.PreprocessingMethod;
+import FitnessFunction.Fitness;
 
 
 /**
@@ -59,11 +59,11 @@ import Preprocessing.PreprocessingMethod;
  */
 public class BestFitSelection implements VMSelection{
 
-    PreprocessingMethod preMethod;
+    Fitness fitnessFunction;
 
 
-    public BestFitSelection(PreprocessingMethod preMethod){
-        this.preMethod = preMethod;
+    public BestFitSelection(Fitness fitnessFunction){
+        this.fitnessFunction = fitnessFunction;
     }
 
 
@@ -85,11 +85,15 @@ public class BestFitSelection implements VMSelection{
         // return the VM's ID
         for(int i = 0; i < vmList.size(); ++i){
             fitnessValue[i] = fitnessFunction(vmList.get(i), container);
+            // First VM
             if(tempFitness == null && fitnessValue[i] != null) {
                 tempFitness = fitnessValue[i];
                 choosedVMID = i + 1;
+                // Does not satisfy the requirement
             } else if(fitnessValue[i] == null){
                 continue;
+
+                // find a better solution
             } else if(tempFitness > fitnessValue[i]){
                 tempFitness = fitnessValue[i];
                 choosedVMID = i + 1;
@@ -107,8 +111,8 @@ public class BestFitSelection implements VMSelection{
             return null;
         }
 
-        fitnessValue = preMethod.tranform((vm.getCpu_remain() - container.getCpu_used()),
-                                            (vm.getMem_remain() - container.getMem_used()));
+        fitnessValue = fitnessFunction.evaluate((vm.getCpu_remain() - container.getCpu_used()),
+                                            (vm.getMem_remain() - container.getMem_used()), vm.getType());
 //        System.out.println("container" + container.getID() + " allocate to VM" + vm.getID() + "fitness = " + fitnessValue);
 //        System.out.println();
         return fitnessValue;

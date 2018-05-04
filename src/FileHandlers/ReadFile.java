@@ -15,22 +15,24 @@ public class ReadFile {
     private double[] VMCpu;
     private double[] VMMem;
     private ArrayList<double[][]> testCases;
+    private ArrayList<double[][]> testCaseOsList;
 
     public ReadFile(
             int VMTypes,
             int[] testCaseNum,
             int[] testCaseSize,
             String PMConfigPath,
-            String base,
-            String VMConfigPath
+            String VMConfigPath,
+            String testCaseBase,
+            String osConfigPath
     ) {
 
         this.testCases = new ArrayList<>();
+        this.testCaseOsList = new ArrayList<>();
         this.testCaseSize = testCaseSize.clone();
 
         readByRow = new ReadByRow();
         readByCol = new ReadByCol();
-
         PMConfig = new double[1][3];
         readByCol.read(PMConfigPath, PMConfig);
         PMCpu = PMConfig[0][0];
@@ -50,10 +52,14 @@ public class ReadFile {
         }
 
         for(int i = testCaseNum[0]; i < testCaseNum[1]; ++i) {
-            double[][] testCase = new double[3][testCaseSize[i]];
-            String testCasePath = base +  "/testCase" + (i + 1) + ".csv";
+            double[][] testCase = new double[2][testCaseSize[i]];
+            double[][] testCaseOs = new double[1][testCaseSize[i]];
+            String testCasePath = testCaseBase +  "/testCase" + (i + 1) + ".csv";
+            String testCaseOSPath = osConfigPath + "os" + (i + 1) + ".csv";
             readByCol.read(testCasePath, testCase);
+            readByCol.read(testCaseOSPath, testCaseOs);
             testCases.add(testCase);
+            testCaseOsList.add(testCaseOs);
         }
 
     }
@@ -84,8 +90,8 @@ public class ReadFile {
     }
     public int[] getTaskOS(int testCaseNum) {
         int[] temp = new int[testCaseSize[testCaseNum]];
-        for(int i = 0; i < testCaseSize[testCaseNum]; ++i) {
-            temp[i] = (int) testCases.get(testCaseNum)[2][i];
+        for(int i = 0; i < testCaseSize[testCaseNum]; i++){
+            temp[i] = (int) testCaseOsList.get(testCaseNum)[0][i];
         }
         return temp.clone();
     }
