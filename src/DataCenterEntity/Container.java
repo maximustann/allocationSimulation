@@ -39,6 +39,10 @@ public class Container implements Holder {
         return os;
     }
 
+    public int getExtraInfo(){
+        return getOs();
+    }
+
     // check
     public void setOs(int os) {
         this.os = os;
@@ -68,6 +72,19 @@ public class Container implements Holder {
     // check
     public double getMem_configuration() {
         return getMem_used();
+    }
+
+    public double getCpu_remain(){
+        return getCpu_used();
+    }
+
+    public double getMem_remain(){
+        return getMem_used();
+    }
+
+
+    public int getType(){
+        return 0;
     }
 
     // check

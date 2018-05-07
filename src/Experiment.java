@@ -12,10 +12,8 @@ import Preprocessing.LinearNormalize;
 import Preprocessing.Normalization;
 import FitnessFunction.Fitness;
 import FitnessFunction.SumMethod;
-import VM_Allocation.*;
-import VM_Selection.BestFitSelection;
+import AllocationMethod.*;
 import VM_Creation.*;
-import VM_Selection.FirstFitSelection;
 
 public class Experiment {
     public static void main(String[] args) throws IOException {
@@ -196,10 +194,7 @@ public class Experiment {
             VMCreation: when there is no suitable VM exist. Create a new one.
                         VMCreation decides the size of VM.
 
-            VMSelection: First we select from existed VMs to allocate a container.
-                        VMSelection choose the suitable VM.
-
-            VMAllocation: Choose the suitable PM to allocate VM
+            ALlocation: Choose VM/PM from existed VM/PM to allocate a contianer/VM
 
             PMCreation: Create a PM when there is suitable PM exist
          */
@@ -211,17 +206,17 @@ public class Experiment {
             default: vmCreationRule =  new Simple();
         }
 
-        VMAllocation vmAllocationRule = null;
+        Allocation vmAllocationRule = null;
         switch (vmAllocationChoice){
-            case 0: vmAllocationRule = new FirstFitAllocation(); break;
-            default: vmAllocationRule = new FirstFitAllocation();
+            case 0: vmAllocationRule = new FirstFit(); break;
+            default: vmAllocationRule = new FirstFit();
         }
 
-        VMSelection vmSelectionRule = null;
+        Allocation vmSelectionRule = null;
         switch (vmSelectionChoice){
-            case 0: vmSelectionRule = new BestFitSelection(fitnessfunc); break;
-            case 1: vmSelectionRule = new FirstFitSelection(); break;
-            default: vmSelectionRule = new BestFitSelection(fitnessfunc);
+            case 0: vmSelectionRule = new BestFit(fitnessfunc); break;
+            case 1: vmSelectionRule = new FirstFit(); break;
+            default: vmSelectionRule = new BestFit(fitnessfunc);
         }
 
         PMCreation pmCreationRule = null;

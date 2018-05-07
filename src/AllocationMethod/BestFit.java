@@ -1,8 +1,9 @@
-package VM_Selection;
+package AllocationMethod;
 import java.util.*;
-import OperationInterface.VMSelection;
+
 import DataCenterEntity.*;
 import FitnessFunction.Fitness;
+import OperationInterface.*;
 
 
 /**
@@ -57,34 +58,34 @@ import FitnessFunction.Fitness;
  * If there is no capable VM, return 0 which means no suitable VM exists.
  *
  */
-public class BestFitSelection implements VMSelection{
+public class BestFit implements Allocation {
 
     Fitness fitnessFunction;
 
 
-    public BestFitSelection(Fitness fitnessFunction){
+    public BestFit(Fitness fitnessFunction){
         this.fitnessFunction = fitnessFunction;
     }
 
 
-    public int execute(ArrayList<VM> vmList, Container container){
+    public int execute(ArrayList<? extends Holder> binList, Holder item){
         // init the choosedVMID = 0,
         // all ID starts from 1, therefore, 0 means NO suitable VM exists.
         int choosedVMID = 0;
-        Double[] fitnessValue = new Double[vmList.size()];
+        Double[] fitnessValue = new Double[binList.size()];
         Double tempFitness = null;
 
 
         // No VM exists yet. Return 0
-        if(vmList.isEmpty()) {
+        if(binList.isEmpty()) {
             System.out.println("No VM in the list");
             return 0;
         }
 
         // Look for the VM which has sufficient resources on 2 dimensions
         // return the VM's ID
-        for(int i = 0; i < vmList.size(); ++i){
-            fitnessValue[i] = fitnessFunction(vmList.get(i), container);
+        for(int i = 0; i < binList.size(); ++i){
+            fitnessValue[i] = fitnessFunction(binList.get(i), item);
             // First VM
             if(tempFitness == null && fitnessValue[i] != null) {
                 tempFitness = fitnessValue[i];
@@ -103,16 +104,16 @@ public class BestFitSelection implements VMSelection{
         return choosedVMID;
     }
 
-    public Double fitnessFunction(VM vm, Container container){
+    public Double fitnessFunction(Holder bin, Holder item){
         Double fitnessValue = 0.0;
-        if(vm.getCpu_remain() <= container.getCpu_used() ||
-                vm.getMem_remain() <= container.getMem_used() ||
-                vm.getOs() != container.getOs()){
+        if(bin.getCpu_remain() <= item.getCpu_used() ||
+                bin.getMem_remain() <= item.getMem_used() ||
+                bin.getExtraInfo() != item.getExtraInfo()){
             return null;
         }
 
-        fitnessValue = fitnessFunction.evaluate((vm.getCpu_remain() - container.getCpu_used()),
-                                            (vm.getMem_remain() - container.getMem_used()), vm.getType());
+        fitnessValue = fitnessFunction.evaluate((bin.getCpu_remain() - item.getCpu_used()),
+                                            (bin.getMem_remain() - item.getMem_used()), bin.getType());
 //        System.out.println("container" + container.getID() + " allocate to VM" + vm.getID() + "fitness = " + fitnessValue);
 //        System.out.println();
         return fitnessValue;

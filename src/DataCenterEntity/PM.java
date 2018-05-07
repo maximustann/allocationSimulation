@@ -247,6 +247,11 @@ public class PM implements Holder {
         return id;
     }
 
+    // getExtraInfo
+    public int getExtraInfo(){
+        return 1;
+    }
+
 
     public void print(){
         System.out.println("PM ID: " + id +
@@ -260,6 +265,9 @@ public class PM implements Holder {
 //        for(VM vm:vmList) vm.print();
     }
 
+    public int getType(){
+        return 0;
+    }
     public double getCpu_configuration() {
         return cpu_configuration;
     }

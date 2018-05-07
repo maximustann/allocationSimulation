@@ -1,8 +1,8 @@
-package VM_Selection;
+package AllocationMethod;
 
 
 import DataCenterEntity.*;
-import OperationInterface.VMSelection;
+import OperationInterface.*;
 import java.util.ArrayList;
 
 
@@ -48,31 +48,31 @@ import java.util.ArrayList;
  * If there is no capable VM, return 0 which means no suitable VM exists.
  *
  */
-public class FirstFitSelection implements VMSelection {
+public class FirstFit implements Allocation {
     @Override
-    public int execute(ArrayList<VM> vmList, Container container) {
+    public int execute(ArrayList<? extends Holder> binList, Holder item) {
         // init the choosedVMID = 0,
         // all ID starts from 1, therefore, 0 means NO suitable VM exists.
         int choosedVMID = 0;
 
 
         // No VM exists yet. Return 0
-        if(vmList.isEmpty()) {
+        if(binList.isEmpty()) {
             System.out.println("No VM in the list");
             return 0;
         }
 
         // Look for the VM which has sufficient resources on 2 dimensions
         // return the VM's ID
-        for(int i = 0; i < vmList.size(); ++i){
+        for(int i = 0; i < binList.size(); ++i){
 
             // If the current vm has enough resource and the OS is compatible with
             // the container
-            if(vmList.get(i).getCpu_remain() >= container.getCpu_configuration() &&
-                    vmList.get(i).getMem_remain() >= container.getMem_configuration() &&
-                    vmList.get(i).getOs() == container.getOs()){
+            if(binList.get(i).getCpu_remain() >= item.getCpu_configuration() &&
+                    binList.get(i).getMem_remain() >= item.getMem_configuration() &&
+                    binList.get(i).getExtraInfo() == item.getExtraInfo()){
 //                System.out.println("VM OS: " + vmList.get(i).getOs() + ", container OS: " + container.getOs());
-                choosedVMID = vmList.get(i).getID();
+                choosedVMID = binList.get(i).getID();
 //                System.out.println("Select a VM ID : " + choosedVMID);
                 break;
             } // End If

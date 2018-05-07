@@ -289,6 +289,11 @@ public class VM implements Holder {
         return os;
     }
 
+    // get ExtraInfor
+    public int getExtraInfo(){
+        return getOs();
+    }
+
     public void setOs(int os) {
         this.os = os;
     }

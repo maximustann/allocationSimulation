@@ -1,9 +1,6 @@
 package DataCenterEntity;
 
-import OperationInterface.PMCreation;
-import OperationInterface.VMAllocation;
-import OperationInterface.VMCreation;
-import OperationInterface.VMSelection;
+import OperationInterface.*;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -19,8 +16,8 @@ public class DataCenter {
 
 
     // scheduling methods
-    private VMAllocation vmAllocation;
-    private VMSelection vmSelection;
+    private Allocation vmAllocation;
+    private Allocation vmSelection;
     private VMCreation vmCreation;
     private PMCreation pmCreation;
 
@@ -54,8 +51,8 @@ public class DataCenter {
             double pmMem,
             double[] vmCpu,
             double[] vmMem,
-            VMAllocation vmAllocation,
-            VMSelection vmSelection,
+            Allocation vmAllocation,
+            Allocation vmSelection,
             VMCreation vmCreation,
             PMCreation pmCreation
     ){
