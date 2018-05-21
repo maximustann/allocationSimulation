@@ -9,11 +9,12 @@ import java.util.HashMap;
 public class DataCenter {
 
     // static data
-    static boolean FAILED = false;
-    static boolean CLOSED = false;
-    static boolean OPEN = true;
-    static boolean ALLOCATED = true;
-
+    public static final boolean FAILED = false;
+    public static final boolean CLOSED = false;
+    public static final boolean OPEN = true;
+    public static final boolean ALLOCATED = true;
+    public static final int VMALLOCATION = 1;
+    public static final int VMSELECTION = 0;
 
     // scheduling methods
     private Allocation vmAllocation;
@@ -80,7 +81,7 @@ public class DataCenter {
 
     // This method is called when new container comes
     public void receiveContainer(Container container){
-        int choosedVMID = vmSelection.execute(vmList, container);
+        int choosedVMID = vmSelection.execute(vmList, container, VMSELECTION);
 
         // If there is no suitable VM to select, then we will need to create a new one
         if(choosedVMID == 0){
@@ -100,7 +101,7 @@ public class DataCenter {
 
             // After we created the vm, we will need to allocate it to a PM, and if there is no suitable PM,
             // We must create a new PM to accommodate and add the PM to pmList
-            int choosedPMID = vmAllocation.execute(pmList, vm);
+            int choosedPMID = vmAllocation.execute(pmList, vm, VMALLOCATION);
             if(choosedPMID == 0){
                 PM pm = pmCreation.execute(pmCpu, pmMem, k, maxEnergy);
                 int currentPMnum = pmList.size();

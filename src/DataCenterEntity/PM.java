@@ -265,8 +265,8 @@ public class PM implements Holder {
 //        for(VM vm:vmList) vm.print();
     }
 
-    public int getType(){
-        return 0;
+    public Integer getType(){
+        return null;
     }
     public double getCpu_configuration() {
         return cpu_configuration;

@@ -82,9 +82,10 @@ public class Container implements Holder {
         return getMem_used();
     }
 
-
-    public int getType(){
-        return 0;
+    // This method is only for bin, not for item!!
+    public Integer getType(){
+        System.out.println("Error: This should not be called!");
+        return null;
     }
 
     // check

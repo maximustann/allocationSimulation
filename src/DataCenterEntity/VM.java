@@ -276,7 +276,7 @@ public class VM implements Holder {
     }
 
     // get type
-    public int getType() {
+    public Integer getType() {
         return type;
     }
 

@@ -60,7 +60,12 @@ import OperationInterface.*;
  */
 public class BestFit implements Allocation {
 
+    public static final int VMSELECTION = 0;
+    public static final int VMALLOCATION = 1;
+
+
     Fitness fitnessFunction;
+
 
 
     public BestFit(Fitness fitnessFunction){
@@ -68,10 +73,10 @@ public class BestFit implements Allocation {
     }
 
 
-    public int execute(ArrayList<? extends Holder> binList, Holder item){
-        // init the choosedVMID = 0,
-        // all ID starts from 1, therefore, 0 means NO suitable VM exists.
-        int choosedVMID = 0;
+    public int execute(ArrayList<? extends Holder> binList, Holder item, int flag){
+        // init the choosedHolderID = 0,
+        // all ID starts from 1, therefore, 0 means NO suitable Holder exists.
+        int choosedHolderID = 0;
         Double[] fitnessValue = new Double[binList.size()];
         Double tempFitness = null;
 
@@ -85,11 +90,11 @@ public class BestFit implements Allocation {
         // Look for the VM which has sufficient resources on 2 dimensions
         // return the VM's ID
         for(int i = 0; i < binList.size(); ++i){
-            fitnessValue[i] = fitnessFunction(binList.get(i), item);
+            fitnessValue[i] = fitnessFunction(binList.get(i), item, flag);
             // First VM
             if(tempFitness == null && fitnessValue[i] != null) {
                 tempFitness = fitnessValue[i];
-                choosedVMID = i + 1;
+                choosedHolderID = i + 1;
                 // Does not satisfy the requirement
             } else if(fitnessValue[i] == null){
                 continue;
@@ -97,24 +102,45 @@ public class BestFit implements Allocation {
                 // find a better solution
             } else if(tempFitness > fitnessValue[i]){
                 tempFitness = fitnessValue[i];
-                choosedVMID = i + 1;
+                choosedHolderID = i + 1;
             }
         } // End for
 
-        return choosedVMID;
+        return choosedHolderID;
     }
 
-    public Double fitnessFunction(Holder bin, Holder item){
+    public Double fitnessFunction(Holder bin, Holder item, int flag){
         Double fitnessValue = 0.0;
-        if(bin.getCpu_remain() <= item.getCpu_used() ||
-                bin.getMem_remain() <= item.getMem_used() ||
-                bin.getExtraInfo() != item.getExtraInfo()){
-            return null;
+
+        // If it is VM allocation, AKA. no OS constraint.
+        // We must use the configuration resources to test it.
+        if(flag == VMALLOCATION){
+            if (bin.getCpu_remain() <= item.getCpu_configuration() ||
+                    bin.getMem_remain() <= item.getMem_configuration()) {
+                return null;
+            }
+        // VM selection, has OS constraint. We must use the actual resources left to test it.
+        } else {
+            if (bin.getCpu_remain() <= item.getCpu_used() ||
+                    bin.getMem_remain() <= item.getMem_used() ||
+                    bin.getExtraInfo() != item.getExtraInfo()
+                    ) {
+                return null;
+            }
         }
 
-        fitnessValue = fitnessFunction.evaluate((bin.getCpu_remain() - item.getCpu_used()),
-                                            (bin.getMem_remain() - item.getMem_used()), bin.getType());
-//        System.out.println("container" + container.getID() + " allocate to VM" + vm.getID() + "fitness = " + fitnessValue);
+        // calculate the fitness value with the residual resources
+        if(flag == VMALLOCATION) {
+            fitnessValue = fitnessFunction.evaluate((bin.getCpu_remain() - item.getCpu_configuration()),
+                    (bin.getMem_remain() - item.getMem_configuration()), bin.getType());
+
+            //VM selection, we use the acutual resources utilization
+        } else{
+            fitnessValue = fitnessFunction.evaluate((bin.getCpu_remain() - item.getCpu_used()),
+                    (bin.getMem_remain() - item.getMem_used()), bin.getType());
+        }
+
+            //        System.out.println("container" + container.getID() + " allocate to VM" + vm.getID() + "fitness = " + fitnessValue);
 //        System.out.println();
         return fitnessValue;
     }

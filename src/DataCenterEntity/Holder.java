@@ -8,7 +8,7 @@ public interface Holder {
     public double getCpu_configuration();
     public double getMem_configuration();
     public int getExtraInfo();
-    public int getType();
+    public Integer getType();
     public int getID();
     public void print();
 }
