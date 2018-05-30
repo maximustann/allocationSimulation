@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 
 import DataCenterEntity.*;
+import FitnessFunction.EvolvedMethod;
 import FitnessFunction.SubMethod;
 import OperationInterface.*;
 import PM_Creation.SimplePM;
@@ -21,6 +22,7 @@ public class Experiment {
         // Fitness functions
         final int SUB_METHOD = 0;
         final int SUM_METHOD = 1;
+        final int EVO_METHOD = 2;
 
 
         // vm creation rules
@@ -31,9 +33,6 @@ public class Experiment {
         // vm selection rules
         final int BESTFIT = 0;
         final int FIRSTFIT = 1;
-
-        // vm allocation rules
-        final int FIRSTFITALLOVM = 0;
 
         // pm creation rules
         final int SIMPLEPM = 0;
@@ -50,12 +49,13 @@ public class Experiment {
         final int FIVE = 2;
 
         experimentRunner(
-                        SMALL,
-                        SINGLE,
+                        MEDIUM,
+                        THREE,
+                        EVO_METHOD,
                         SUB_METHOD,
-                        SIMPLE,
-                        FIRSTFITALLOVM,
+                        LARGEST,
                         FIRSTFIT,
+                        BESTFIT,
                         SIMPLEPM);
     }
 
@@ -64,7 +64,8 @@ public class Experiment {
     public static void experimentRunner(
                                 int testCaseSizeChoice,
                                 int osChoice,
-                                int fitnessChoice,
+                                int selectionFitnessChoice,
+                                int allocationFitnessChoice,
                                 int vmCreationChoice,
                                 int vmAllocationChoice,
                                 int vmSelectionChoice,
@@ -179,14 +180,24 @@ public class Experiment {
 
 
         // Normalization method, pass the vm configuration
-        Normalization norm = new LinearNormalize(vmCpu, vmMem);
+        Normalization norm = new LinearNormalize(vmCpu, vmMem, pmCpu, pmMem);
 
-        // fitness Function List
-        Fitness fitnessfunc = null;
-        switch (fitnessChoice){
-            case 0: fitnessfunc = new SumMethod(norm); break;
-            case 1: fitnessfunc = new SubMethod(norm); break;
-            default: fitnessfunc = new SumMethod(norm);
+        // selection fitness Function List
+        Fitness selectionFitnessfunc = null;
+        switch (selectionFitnessChoice){
+            case 0: selectionFitnessfunc = new SumMethod(norm); break;
+            case 1: selectionFitnessfunc = new SubMethod(norm); break;
+            case 2: selectionFitnessfunc = new EvolvedMethod(norm); break;
+            default: selectionFitnessfunc = new SumMethod(norm);
+        }
+
+        // allocation fitness Function List
+        Fitness allocationFitnessfunc = null;
+        switch(allocationFitnessChoice){
+            case 0: allocationFitnessfunc = new SumMethod(norm); break;
+            case 1: allocationFitnessfunc = new SubMethod(norm); break;
+            case 2: allocationFitnessfunc = new EvolvedMethod(norm); break;
+            default: allocationFitnessfunc = new SubMethod(norm);
         }
 
 
@@ -208,15 +219,16 @@ public class Experiment {
 
         Allocation vmAllocationRule = null;
         switch (vmAllocationChoice){
-            case 0: vmAllocationRule = new FirstFit(); break;
+            case 0: vmAllocationRule = new BestFit(allocationFitnessfunc);break;
+            case 1: vmAllocationRule = new FirstFit(); break;
             default: vmAllocationRule = new FirstFit();
         }
 
         Allocation vmSelectionRule = null;
         switch (vmSelectionChoice){
-            case 0: vmSelectionRule = new BestFit(fitnessfunc); break;
+            case 0: vmSelectionRule = new BestFit(selectionFitnessfunc); break;
             case 1: vmSelectionRule = new FirstFit(); break;
-            default: vmSelectionRule = new BestFit(fitnessfunc);
+            default: vmSelectionRule = new BestFit(selectionFitnessfunc);
         }
 
         PMCreation pmCreationRule = null;
@@ -260,10 +272,11 @@ public class Experiment {
 //                System.out.println(taskCpu[i] + " : " + taskMem[i] + " : " + taskOS[i]);
                 // ID starts from 1
                 myDataCenter.receiveContainer(new Container(taskCpu[i], taskMem[i], taskOS[i], i));
-                myDataCenter.print();
+//                myDataCenter.print();
             }
 //            myDataCenter.print();
 
+            System.out.println("Total Energy: " + myDataCenter.calEnergy());
 
             // Reset Counters
             PM.resetCounter();

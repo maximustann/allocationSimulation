@@ -99,7 +99,8 @@ public class BestFit implements Allocation {
             } else if(fitnessValue[i] == null){
                 continue;
 
-                // find a better solution
+                // This is the core of BestFit
+                // A smaller tempFitness is better
             } else if(tempFitness > fitnessValue[i]){
                 tempFitness = fitnessValue[i];
                 choosedHolderID = i + 1;
@@ -131,13 +132,23 @@ public class BestFit implements Allocation {
 
         // calculate the fitness value with the residual resources
         if(flag == VMALLOCATION) {
-            fitnessValue = fitnessFunction.evaluate((bin.getCpu_remain() - item.getCpu_configuration()),
-                    (bin.getMem_remain() - item.getMem_configuration()), bin.getType());
+            fitnessValue = fitnessFunction.evaluate(
+                                            bin.getCpu_remain(),
+                                            bin.getMem_remain(),
+                                            item.getCpu_configuration(),
+                                            item.getMem_configuration(),
+                                            null,
+                                            null);
 
-            //VM selection, we use the acutual resources utilization
+            //VM selection, we use the acutual residual resources
         } else{
-            fitnessValue = fitnessFunction.evaluate((bin.getCpu_remain() - item.getCpu_used()),
-                    (bin.getMem_remain() - item.getMem_used()), bin.getType());
+            fitnessValue = fitnessFunction.evaluate(
+                                        bin.getCpu_remain(),
+                                        bin.getMem_remain(),
+                                        item.getCpu_used(),
+                                        item.getMem_used(),
+                                        null,
+                                        null);
         }
 
             //        System.out.println("container" + container.getID() + " allocate to VM" + vm.getID() + "fitness = " + fitnessValue);

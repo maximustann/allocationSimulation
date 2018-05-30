@@ -17,10 +17,24 @@ public class SubMethod implements Fitness {
 
 
     // Preprocessing on the multi-dimensional resources transform multiple resources into one scalar
-    public double evaluate(double cpu, double mem, int vmType){
+    public double evaluate(
+                    double binCPUremain,
+                    double binMEMremain,
+                    double itemCPUrequire,
+                    double itemMEMrequire,
+                    Double optional,
+                    Integer type){
         double[] cpuMem;
         double sub = 0;
-        cpuMem = norm.normalize(cpu, mem, vmType);
+
+        // calculate the left resources
+        double cpu = binCPUremain - itemCPUrequire;
+        double mem = binMEMremain - itemMEMrequire;
+
+        cpuMem = norm.normalize(cpu, mem, type);
+
+
+        // core
         if(cpuMem[0] >= cpuMem[1])
             sub = cpuMem[0] - cpuMem[1];
         else

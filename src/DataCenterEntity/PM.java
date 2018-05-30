@@ -265,6 +265,7 @@ public class PM implements Holder {
 //        for(VM vm:vmList) vm.print();
     }
 
+    // the type of PM is null
     public Integer getType(){
         return null;
     }
