@@ -87,26 +87,41 @@ public class BestFit implements Allocation {
             return 0;
         }
 
+//        System.out.println("All the VMs = ");
+//        for(int i = 0; i < binList.size(); i++){
+//            binList.get(i).print();
+//        }
+//        System.out.println();
+
         // Look for the VM which has sufficient resources on 2 dimensions
         // return the VM's ID
+//        System.out.println("Now we have " + binList.size() + " number of VM");
+//        System.out.println("feasible solutions = ");
         for(int i = 0; i < binList.size(); ++i){
             fitnessValue[i] = fitnessFunction(binList.get(i), item, flag);
             // First VM
             if(tempFitness == null && fitnessValue[i] != null) {
                 tempFitness = fitnessValue[i];
-                choosedHolderID = i + 1;
+//                binList.get(i).print();
+
+                // should not be the index of the binList. should be holder ID !!!
+                choosedHolderID = binList.get(i).getID();
+//                System.out.println("First selection, selected " + choosedHolderID + " with fitness = " + fitnessValue[i]);
                 // Does not satisfy the requirement
             } else if(fitnessValue[i] == null){
                 continue;
 
                 // This is the core of BestFit
-                // A smaller tempFitness is better
-            } else if(tempFitness > fitnessValue[i]){
+                // A bigger tempFitness is better
+            } else if(tempFitness < fitnessValue[i]){
+//                System.out.println("VM " + (i + 1) + " is better with " + fitnessValue[i] + " > " + tempFitness);
                 tempFitness = fitnessValue[i];
-                choosedHolderID = i + 1;
+                choosedHolderID = binList.get(i).getID();
+//                binList.get(i).print();
             }
         } // End for
 
+//        System.out.println("eventually selected " + choosedHolderID);
         return choosedHolderID;
     }
 

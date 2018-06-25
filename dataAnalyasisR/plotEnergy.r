@@ -31,7 +31,7 @@ plotComparison <- function(alg1, alg2, alg3='', step, maximum){
 	par(new=T)
 	if(alg3 != '')
 		plot(alg3Energy, ylab='energy', ylim=range(0, maxEng), col='black')
-	dev.off()
+	# dev.off()
 
 }
 

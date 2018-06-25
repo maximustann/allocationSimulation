@@ -12,7 +12,7 @@ public class Largest implements VMCreation {
      * @param container
      * @return the new VM that we created
      */
-    public VM execute(double[] vmCpu, double[] vmMem, Container container){
+    public VM execute(double[] vmCpu, double[] vmMem, Container container, double[] osProb){
         VM vm = new VM(vmCpu[vmCpu.length - 1], vmMem[vmMem.length - 1], vmCpu.length - 1);
 
         // return the vm

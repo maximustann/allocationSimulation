@@ -7,12 +7,33 @@ import FileHandlers.*;
 
 public class Monitor {
     WriteFile writeFile;
+    private ArrayList<Double> energyList;
 
     public Monitor(){
         writeFile = new WriteFile();
+        energyList = new ArrayList<Double>();
     }
 
 
+    public void addEnergy(Double energy){
+        energyList.add(Math.round(energy * 100) / 100.0);
+    }
+
+    public void writeEnergy(String path){
+        try {
+            writeFile.writeEnergy(path, energyList);
+        } catch (IOException e1){
+            e1.printStackTrace();
+        }
+    }
+
+    public void writeAccEnergy(String path){
+        try {
+            writeFile.writeAccumulatedEnergy(path, energyList);
+        } catch (IOException e1){
+            e1.printStackTrace();
+        }
+    }
 
     private ArrayList<double[]> getPMStatus(ArrayList<PM> pmList){
         /*

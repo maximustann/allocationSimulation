@@ -24,7 +24,7 @@ public class VM implements Holder {
      * @param mem_remain = mem_configuration - mem_used
      * @param cpu_utilization is the cpu utilization of the current VM
      * @param mem_utilization is the mem utilization of the current VM
-     * @param type is the type of VM
+     * @param type is the type of VM, start from 0
      * @param os is the configured OS of VM, and the OS is initialized as 0 (No OS).
      * @param allocateTo is the PM that this VM allocated to.
      * @param containerList contains all the containers that allocated to this VM.
@@ -52,7 +52,7 @@ public class VM implements Holder {
         this.cpu_configuration = cpu;
         this.mem_configuration = mem;
 
-        // cpu and mem are used from the creation of the VM
+        // cpu and mem are used from the beginning of the VM
         cpu_used = cpu_configuration * CPU_OVERHEAD_RATE;
         mem_used = MEM_OVERHEAD;
         cpu_remain = cpu_configuration - cpu_used;
@@ -101,8 +101,8 @@ public class VM implements Holder {
     public double getBalance(){
         double balance = 0;
         if(cpu_utilization >= mem_utilization)
-            balance = cpu_utilization / mem_utilization;
-        else balance = mem_utilization / cpu_utilization;
+            balance = mem_utilization / cpu_utilization;
+        else balance = cpu_utilization / mem_utilization;
         return balance;
     }
 
@@ -183,6 +183,13 @@ public class VM implements Holder {
 
                 // setup OS
                 os = container.getOs();
+
+                // call PM to update its utilization
+                if(allocateTo != null) {
+//                    System.out.println("Call host PM ID：" + allocateTo.getID());
+                    allocateTo.allocateNewContainer(container.getCpu_used(), container.getMem_used());
+                }
+
 //                System.out.println("After OS: " + os);
             } else {
                 System.out.println("ERROR: container allocation failed, insufficient resources");
@@ -304,8 +311,8 @@ public class VM implements Holder {
     }
 
     public void print(){
-        System.out.println("VM ID: " + id + ", CPU: "+ cpu_used + ", Mem: " + mem_used +
-                ", OS: " + os);
+        System.out.println("VM ID: " + id + ", CPU_used: "+ cpu_used + ", Mem_used: " + mem_used +
+                ", OS: " + os + ", Balance = " + getBalance());
     }
 
     public int getID() {

@@ -16,15 +16,18 @@ public class ReadFile {
     private double[] VMMem;
     private ArrayList<double[][]> testCases;
     private ArrayList<double[][]> testCaseOsList;
+    private double[] osProb;
 
     public ReadFile(
             int VMTypes,
+            int osNum,
             int[] testCaseNum,
             int[] testCaseSize,
             String PMConfigPath,
             String VMConfigPath,
             String testCaseBase,
-            String osConfigPath
+            String osConfigPath,
+            String osProbPath
     ) {
 
         this.testCases = new ArrayList<>();
@@ -51,11 +54,18 @@ public class ReadFile {
             VMMem[i] = VMConfig[i][1];
         }
 
-        for(int i = testCaseNum[0]; i < testCaseNum[1]; ++i) {
+        double[][] temp = new double[1][osNum];
+        readByCol.read(osProbPath, temp);
+        osProb = new double[osNum];
+        for(int i = 0; i < osNum; ++i){
+            osProb[i] = temp[0][i];
+        }
+
+        for(int i = 0; i + testCaseNum[0] < testCaseNum[1]; ++i) {
             double[][] testCase = new double[2][testCaseSize[i]];
             double[][] testCaseOs = new double[1][testCaseSize[i]];
-            String testCasePath = testCaseBase +  "/testCase" + (i + 1) + ".csv";
-            String testCaseOSPath = osConfigPath + "os" + (i + 1) + ".csv";
+            String testCasePath = testCaseBase +  "testCase" + (i + testCaseNum[0]) + ".csv";
+            String testCaseOSPath = osConfigPath + "testCase" + (i + testCaseNum[0]) + ".csv";
             readByCol.read(testCasePath, testCase);
             readByCol.read(testCaseOSPath, testCaseOs);
             testCases.add(testCase);
@@ -64,6 +74,9 @@ public class ReadFile {
 
     }
 
+    public double[] getOsProb(){
+        return osProb;
+    }
     public double getVMTypes() {
         return VMTypes;
     }

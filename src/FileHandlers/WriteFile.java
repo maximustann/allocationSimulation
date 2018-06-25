@@ -9,6 +9,7 @@ import FileHandlers.WriteByRow;
 public class WriteFile {
 	private WriteByRow pmWriter;
 	private WriteByRow vmWriter;
+	private WriteByRow energyWriter;
 
 	/**
 	 * constructor
@@ -16,6 +17,7 @@ public class WriteFile {
 	public WriteFile(){
 		pmWriter = new WriteByRow(",", 1);
 		vmWriter = new WriteByRow(",", 1);
+		energyWriter = new WriteByRow("\n", 1);
 	}
 	
 	/**
@@ -28,9 +30,19 @@ public class WriteFile {
 		if(!vmDir.exists()){
 			vmDir.mkdir();
 		}
-		// Write vm status
+		// for each pm, write vm status on that pm
 		for(int i = 0; i < pmStatus.size(); ++i){
 			vmWriter.writeArray( base + "vm/pm_" + (i + 1) + ".csv", (ArrayList) vmStatus.get(i));
 		}
+	}
+
+	// write Energy to file
+	public void writeEnergy(String base, ArrayList<Double> energy) throws IOException{
+		energyWriter.write(base + "energy.csv", energy);
+	}
+
+	// write Acc Energy to file
+	public void writeAccumulatedEnergy(String base, ArrayList<Double> energy) throws IOException{
+		energyWriter.write(base + "AccumulatedEnergy.csv", energy);
 	}
 }

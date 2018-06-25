@@ -9503,6 +9503,12 @@
       <w>agrepl</w>
       <w>agriculture</w>
       <w>agrostis</w>
+      <w>aiData</w>
+      <w>aiDiag</w>
+      <w>aiDynFit</w>
+      <w>aiElas</w>
+      <w>aiStaFit</w>
+      <w>aiStaHau</w>
       <w>aic</w>
       <w>aic.nest</w>
       <w>aicm</w>
@@ -12293,6 +12299,10 @@
       <w>bryophytes</w>
       <w>bs</w>
       <w>bsBootMiss</w>
+      <w>bsFormu</w>
+      <w>bsLag</w>
+      <w>bsStat</w>
+      <w>bsTab</w>
       <w>bsamsize</w>
       <w>bsetal97</w>
       <w>bsnCV</w>
@@ -15029,6 +15039,15 @@
       <w>da.cat</w>
       <w>da.dist</w>
       <w>da.thresh</w>
+      <w>daBed</w>
+      <w>daBedRaw</w>
+      <w>daEsa</w>
+      <w>daExp</w>
+      <w>daIns</w>
+      <w>daInsNam</w>
+      <w>daLaw</w>
+      <w>daPe</w>
+      <w>daRoll</w>
       <w>dabipf</w>
       <w>dagoTest</w>
       <w>daily</w>
@@ -16357,6 +16376,7 @@
       <w>download.amsr</w>
       <w>download.coastline</w>
       <w>download.file</w>
+      <w>download.lib</w>
       <w>download.met</w>
       <w>download.packages</w>
       <w>download.topo</w>
@@ -17217,6 +17237,7 @@
       <w>eratosthenes</w>
       <w>ercomp</w>
       <w>erdos.renyi.game</w>
+      <w>erer</w>
       <w>erf</w>
       <w>erfc</w>
       <w>erfcinv</w>
@@ -17431,6 +17452,8 @@
       <w>europe.bdy</w>
       <w>europe.cil</w>
       <w>europe.riv</w>
+      <w>evReturn</w>
+      <w>evRisk</w>
       <w>eval</w>
       <w>eval.basis</w>
       <w>eval.bifd</w>
@@ -21412,6 +21435,7 @@
       <w>head.matrix</w>
       <w>head.mondate</w>
       <w>head.spam</w>
+      <w>head.ts</w>
       <w>headInjury</w>
       <w>headTail</w>
       <w>head_of</w>
@@ -25032,6 +25056,7 @@
       <w>listbdsmatrix</w>
       <w>listen</w>
       <w>listeria</w>
+      <w>listn</w>
       <w>listof</w>
       <w>listw2U</w>
       <w>listw2WB</w>
@@ -25485,6 +25510,7 @@
       <w>lsqnonlin</w>
       <w>lsqnonneg</w>
       <w>lsqsep</w>
+      <w>lss</w>
       <w>lssvm</w>
       <w>lst</w>
       <w>lst_</w>
@@ -25559,7 +25585,9 @@
       <w>ma1.1.s</w>
       <w>ma1.2.s</w>
       <w>ma2.s</w>
+      <w>maBina</w>
       <w>maED</w>
+      <w>maTrend</w>
       <w>maas</w>
       <w>maas.bank</w>
       <w>macaca</w>
@@ -28499,6 +28527,8 @@
       <w>observed</w>
       <w>observer3d</w>
       <w>obsvd.het</w>
+      <w>ocME</w>
+      <w>ocProb</w>
       <w>ocarcinoma</w>
       <w>ocat</w>
       <w>occasion</w>
@@ -30233,6 +30263,7 @@
       <w>plot.equiv.clust</w>
       <w>plot.ergm</w>
       <w>plot.errorlod</w>
+      <w>plot.evReturn</w>
       <w>plot.eval</w>
       <w>plot.ex</w>
       <w>plot.fARMA</w>
@@ -30315,6 +30346,7 @@
       <w>plot.lspec</w>
       <w>plot.ltm</w>
       <w>plot.lurk</w>
+      <w>plot.maTrend</w>
       <w>plot.manyany</w>
       <w>plot.manyglm</w>
       <w>plot.manylm</w>
@@ -30354,6 +30386,7 @@
       <w>plot.new</w>
       <w>plot.nmds</w>
       <w>plot.objsurf</w>
+      <w>plot.ocProb</w>
       <w>plot.oldlogspline</w>
       <w>plot.onearrow</w>
       <w>plot.ordinalgmifs</w>
@@ -31538,6 +31571,8 @@
       <w>print.abs.error.pred</w>
       <w>print.addtest</w>
       <w>print.addvar</w>
+      <w>print.aiFit</w>
+      <w>print.aidata</w>
       <w>print.alpha</w>
       <w>print.anova.gam</w>
       <w>print.anova.manyany</w>
@@ -31625,6 +31660,8 @@
       <w>print.ergm</w>
       <w>print.est_multi_poly</w>
       <w>print.est_multi_poly_clust</w>
+      <w>print.evReturn</w>
+      <w>print.evRisk</w>
       <w>print.ewcdf</w>
       <w>print.factor</w>
       <w>print.false.nearest</w>
@@ -31721,6 +31758,8 @@
       <w>print.lut</w>
       <w>print.mChoice</w>
       <w>print.mKrig</w>
+      <w>print.maBina</w>
+      <w>print.maTrend</w>
       <w>print.manyany</w>
       <w>print.manyglm</w>
       <w>print.matched</w>
@@ -31765,6 +31804,8 @@
       <w>print.noquote</w>
       <w>print.numeric_version</w>
       <w>print.objsurf</w>
+      <w>print.ocME</w>
+      <w>print.ocProb</w>
       <w>print.octmode</w>
       <w>print.oldlogspline</w>
       <w>print.oneSamp</w>
@@ -31989,6 +32030,7 @@
       <w>print.two.stage</w>
       <w>print.units</w>
       <w>print.upscale2d</w>
+      <w>print.urdf2</w>
       <w>print.varclus</w>
       <w>print.vblogit</w>
       <w>print.virtual</w>
@@ -38436,6 +38478,7 @@
       <w>summary.Verbose</w>
       <w>summary.aalen</w>
       <w>summary.agree.sim</w>
+      <w>summary.aiFit</w>
       <w>summary.anylist</w>
       <w>summary.aov</w>
       <w>summary.areg.boot</w>
@@ -38979,6 +39022,7 @@
       <w>systemR.default</w>
       <w>systemfit</w>
       <w>systemfit.control</w>
+      <w>systemfitAR</w>
       <w>t</w>
       <w>t.data.frame</w>
       <w>t.default</w>
@@ -39073,6 +39117,7 @@
       <w>tail.matrix</w>
       <w>tail.mondate</w>
       <w>tail.spam</w>
+      <w>tail.ts</w>
       <w>tail_of</w>
       <w>tail_while</w>
       <w>tailslave.log</w>
@@ -40716,6 +40761,7 @@
       <w>uqf</w>
       <w>uqs</w>
       <w>ur.df</w>
+      <w>ur.df2</w>
       <w>ur.ers</w>
       <w>ur.kpss</w>
       <w>ur.pp</w>
@@ -41779,6 +41825,7 @@
       <w>write.infile</w>
       <w>write.irts</w>
       <w>write.jagsfile</w>
+      <w>write.list</w>
       <w>write.loci</w>
       <w>write.mat</w>
       <w>write.matrix</w>

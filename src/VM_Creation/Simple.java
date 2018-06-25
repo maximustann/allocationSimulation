@@ -14,7 +14,7 @@ public class Simple implements VMCreation {
      * @param container
      * @return the new VM that we created
      */
-    public VM execute(double[] vmCpu, double[] vmMem, Container container){
+    public VM execute(double[] vmCpu, double[] vmMem, Container container, double[] osProb){
         VM vm = null;
         // Search through the VM array from the smallest to the largest
         // until we find the smallest VM which has enough capacity to host the container

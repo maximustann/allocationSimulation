@@ -57,7 +57,7 @@ public class PM implements Holder {
         id = pmCounter;
     }
 
-    // Balance should always be in [0, 1]
+    // Balance should always be in [0, 1], the closer to 1, the more balance
     public double getBalance(){
         double balance = 0;
         if(cpu_utilization >= mem_utilization)
@@ -261,8 +261,23 @@ public class PM implements Holder {
                 ", Mem remain: " + Math.round(mem_remain * 100) / 100.0 +
                 ", CPU utilization: " + Math.round(cpu_utilization * 10000) / 10000.0 +
                 ", Mem utilization: " + Math.round(mem_utilization * 10000) / 10000.0 +
-                ", energy: " + Math.round(calEnergy() * 100) / 100.0);
+                ", energy: " + Math.round(calEnergy() * 100) / 100.0 +
+                ", number of containers = " + getContainerNum());
 //        for(VM vm:vmList) vm.print();
+    }
+
+    // return the number of all containers in all VMs in this PM
+    public int getContainerNum(){
+        int sum = 0;
+        for(int i = 0; i < vmList.size(); i++){
+            sum += vmList.get(i).getContainerNum();
+        }
+        return sum;
+    }
+
+    // return the number of vm in this pm
+    public int getVMNum(){
+        return vmList.size();
     }
 
     // the type of PM is null

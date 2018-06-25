@@ -33,13 +33,14 @@ public class EvolvedMethod implements Fitness {
         // We use PM to normalize both, therefore, the type is null.
         normalizedBin = norm.normalize(binCPUremain, binMEMremain, null);
         normalizedItem = norm.normalize(itemCPUrequire, itemMEMrequire, null);
-        
-        
-        
-        
-        
+		// 
+		double normalizedLeftVMBalance = 0.0;
+		double leftVMCpu = normalizedBin[0] - normalizedItem[0];
+		double leftVMMem = normalizedBin[1] - normalizedItem[1];
+		if(leftVMCpu > leftVMMem)
+			normalizedLeftVMBalance = leftVMCpu / leftVMMem;
+		else
+			normalizedLeftVMBalance = leftVMMem / leftVMCpu;
 value = 
-(((((normalizedItem[1] + normalizedItem[1]) + (normalizedItem[1] - normalizedItem[1])) + ((normalizedItem[1] / normalizedItem[0]) * (normalizedItem[1] + normalizedItem[1]))) - (((normalizedItem[0] - normalizedItem[0]) - (normalizedItem[1] - normalizedItem[1])) + ((normalizedItem[1] / normalizedItem[1]) - normalizedItem[0]))) + ((((normalizedItem[1] - normalizedItem[1]) * (normalizedItem[1] * normalizedItem[0])) + ((normalizedItem[0] - normalizedItem[1]) + (normalizedItem[0] - normalizedItem[1]))) + (((normalizedItem[0] - normalizedItem[1]) * (normalizedItem[1] - normalizedItem[1])) + ((normalizedItem[1] * normalizedItem[0]) - (normalizedItem[1] - normalizedItem[0]))))) * (((((normalizedItem[1] - normalizedItem[0]) + (normalizedBin[0] + normalizedItem[1])) + ((normalizedItem[1] * normalizedBin[0]) - (normalizedItem[1] + normalizedItem[0]))) / (((normalizedItem[1] - normalizedItem[1]) + (normalizedItem[0] - normalizedItem[1])) / ((normalizedItem[1] + normalizedItem[1]) - (normalizedItem[1] + normalizedItem[0])))) + ((((normalizedBin[0] - normalizedItem[0]) * (normalizedBin[0] / normalizedItem[0])) * ((normalizedItem[0] - normalizedItem[1]) * (normalizedItem[1] - normalizedItem[1]))) / ((normalizedItem[1] + normalizedItem[0]) - ((normalizedItem[1] * normalizedItem[0]) * (normalizedBin[0] + normalizedItem[1])))))
-;
-//        System.out.println(value);
-return value;}}
+(((leftVMCpu - normalizedItem[0]) - normalizedItem[0]) * (normalizedLeftVMBalance * (((normalizedLeftVMBalance - leftVMMem) * normalizedLeftVMBalance) * ((normalizedLeftVMBalance - leftVMMem) * normalizedLeftVMBalance)))) - ((((leftVMCpu - normalizedItem[0]) - normalizedItem[0]) / (normalizedLeftVMBalance * ((normalizedLeftVMBalance - leftVMMem) - leftVMMem))) + leftVMCpu)
+;return value;}}
