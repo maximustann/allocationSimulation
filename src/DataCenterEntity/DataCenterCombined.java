@@ -3,11 +3,12 @@ package DataCenterEntity;
 import OperationInterface.Allocation;
 import OperationInterface.PMCreation;
 import OperationInterface.VMCreation;
+import OperationInterface.VMSelectionCreation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class DataCenterCombined {
+public class DataCenterCombined implements DataCenterInterface{
 
     // static data
     public static final boolean FAILED = false;
@@ -19,8 +20,7 @@ public class DataCenterCombined {
 
     // scheduling methods
     private Allocation vmAllocation;
-    private Allocation vmSelection;
-    private VMCreation vmCreation;
+    private VMSelectionCreation vmSelectionCreation;
     private PMCreation pmCreation;
 
     // List of PMs and List of VMs
@@ -59,8 +59,7 @@ public class DataCenterCombined {
             double[] vmMem,
             double[] osProb,
             Allocation vmAllocation,
-            Allocation vmSelection,
-            VMCreation vmCreation,
+            VMSelectionCreation vmSelectionCreation,
             PMCreation pmCreation
     ){
         this.maxEnergy = maxEnergy;
@@ -71,8 +70,7 @@ public class DataCenterCombined {
         this.vmMem = vmMem.clone();
         this.osProb = osProb.clone();
         this.vmAllocation = vmAllocation;
-        this.vmSelection = vmSelection;
-        this.vmCreation = vmCreation;
+        this.vmSelectionCreation = vmSelectionCreation;
         this.pmCreation = pmCreation;
         this.VMIDtoListIndex = new HashMap();
         this.PMIDtoListIndex = new HashMap();
@@ -159,7 +157,7 @@ public class DataCenterCombined {
 
         } // End of each PM
 
-        //calculate Energy consumption, not acculated...
+        //update acculated Energy consumption
         updateAccumulatedEnergy();
 
         // save the current energy consumption
@@ -171,34 +169,41 @@ public class DataCenterCombined {
     // This method is called when new container comes
     public void receiveContainer(Container container){
 
-//        System.out.println();
-        int choosedVMID = vmSelection.execute(vmList, container, VMSELECTION);
+        // select or create a VM
+        VM choosedVM = vmSelectionCreation.execute(vmList, vmCpu, vmMem, container, osProb);
+
+        // If the algorithm has chosen an existing VM
+        if(VMIDtoListIndex.containsKey(choosedVM.getID())){
+
+            choosedVM.addContainer(container);
+
+            // Else the algorithm has created a new VM, add the container to the VM
+            // Add this VM to the vmList
+        } else {
+
+            // adjust the current vm global counter and the current VM ID
+            int newID = VM.getGlobalCounter() + 1;
+            VM.setGlobalCounter(newID);
+            choosedVM.setID(newID);
 
 
+            // add the container to the VM
+            choosedVM.addContainer(container);
 
-        // If there is no suitable VM to select, then we will need to create a new one
-        if(choosedVMID == 0){
-
-            System.out.println("Create VM branch");
-            // 1. We create a new VM
-            // 2. Add the container to the new VM
-            // 3. Add the new VM to the vmList
-            VM vm = vmCreation.execute(vmCpu, vmMem, container, osProb);
-
-            vm.addContainer(container);
             int currentVMnum = vmList.size();
-            vmList.add(vm);
+            vmList.add(choosedVM);
 
             // We map VM ID and its index in the vmList
-            VMIDtoListIndex.put(vm.getID(), currentVMnum);
+            VMIDtoListIndex.put(choosedVM.getID(), currentVMnum);
+
 
             // After we created the vm, we will need to allocate it to a PM, and if there is no suitable PM,
             // We must create a new PM to accommodate and add the PM to pmList
-            int choosedPMID = vmAllocation.execute(pmList, vm, VMALLOCATION);
+            int choosedPMID = vmAllocation.execute(this, choosedVM, VMALLOCATION);
             if(choosedPMID == 0){
                 PM pm = pmCreation.execute(pmCpu, pmMem, k, maxEnergy);
                 int currentPMnum = pmList.size();
-                pm.addVM(vm);
+                pm.addVM(choosedVM);
                 pmList.add(pm);
 
 
@@ -212,27 +217,11 @@ public class DataCenterCombined {
                 // Then, we retrieve it from the list
                 // Finally, we add the VM to the PM.
                 PM choosedPM = pmList.get((int) PMIDtoListIndex.get(choosedPMID));
-                choosedPM.addVM(vm);
+                choosedPM.addVM(choosedVM);
 
             }
             // If there is a suitable VM, then allocate to this VM
-        } else{
-
-//            System.out.println("VM Selection branch");
-            // First, we look for VM's index in the list
-            // Then, we retrieve it from the list
-            // Finally, we add the container to the VM.
-            VM choosedVM = vmList.get((int) VMIDtoListIndex.get(choosedVMID));
-//            choosedVM.print();
-            choosedVM.addContainer(container);
         }
-        // Recording happen in every 20 allocations
-//        int testCase = container.getID() + 1;
-//        if(testCase  % 20 == 0){
-//            File bF = new File(base + testCase + "/");
-//            if(!bF.exists()) bF.mkdir();
-//            monitor.writeStatusFiles(base + testCase + "/", pmList);
-//        }
 
         // After allocating a container, update the accumulated energy consumption of the current data center
         updateAccumulatedEnergy();

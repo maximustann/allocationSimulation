@@ -1,5 +1,7 @@
 package AllocationMethod;
 
+import DataCenterEntity.DataCenter;
+import DataCenterEntity.DataCenterInterface;
 import DataCenterEntity.Holder;
 import FitnessFunction.Fitness;
 import OperationInterface.Allocation;
@@ -74,7 +76,14 @@ public class BestFit_Sub implements Allocation {
     }
 
 
-    public int execute(ArrayList<? extends Holder> binList, Holder item, int flag){
+    public int execute(DataCenterInterface outDataCenter, Holder item, int flag){
+        DataCenter dataCenter = (DataCenter) outDataCenter;
+        ArrayList<? extends Holder> binList = null;
+        if(flag == VMALLOCATION)
+            binList = dataCenter.pmList;
+        else
+            binList = dataCenter.vmList;
+
 //        System.out.println("Use BestFit_Sub");
         // init the choosedHolderID = 0,
         // all ID starts from 1, therefore, 0 means NO suitable Holder exists.
@@ -105,7 +114,7 @@ public class BestFit_Sub implements Allocation {
 //                binList.get(i).print();
 
 
-            fitnessValue[i] = fitnessFunction(binList.get(i), item, flag);
+            fitnessValue[i] = fitnessFunction(dataCenter, binList.get(i), item, flag);
             // First VM
             if(tempFitness == null && fitnessValue[i] != null) {
                 tempFitness = fitnessValue[i];
@@ -128,7 +137,7 @@ public class BestFit_Sub implements Allocation {
         return choosedHolderID;
     }
 
-    public Double fitnessFunction(Holder bin, Holder item, int flag){
+    public Double fitnessFunction(DataCenter dataCenter, Holder bin, Holder item, int flag){
         Double fitnessValue = 0.0;
 
         // If it is VM allocation, AKA. no OS constraint.
@@ -151,6 +160,7 @@ public class BestFit_Sub implements Allocation {
         // calculate the fitness value with the residual resources, we use PM resource to normalize the residual resources
         if(flag == VMALLOCATION) {
             fitnessValue = fitnessFunction.evaluate(
+                                            dataCenter,
                                             bin.getCpu_remain(),
                                             bin.getMem_remain(),
                                             item.getCpu_configuration(),
@@ -161,6 +171,7 @@ public class BestFit_Sub implements Allocation {
             //VM selection, we use the acutual residual resources, we use the PM resource to normalize the residual resources
         } else{
             fitnessValue = fitnessFunction.evaluate(
+                                        dataCenter,
                                         bin.getCpu_remain(),
                                         bin.getMem_remain(),
                                         item.getCpu_used(),

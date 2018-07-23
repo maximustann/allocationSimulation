@@ -53,7 +53,16 @@ public class FirstFit implements Allocation {
     final int VMSELECTION = 0;
     final int VMALLOCATION = 1;
 
-    public int execute(ArrayList<? extends Holder> binList, Holder item, int flag) {
+    public int execute(DataCenterInterface outDataCenter, Holder item, int flag) {
+        DataCenter dataCenter = (DataCenter) outDataCenter;
+
+
+        ArrayList<? extends Holder> binList = null;
+        if(flag == VMALLOCATION)
+            binList = dataCenter.pmList;
+        else
+            binList = dataCenter.vmList;
+
         // init the choosedVMID = 0,
         // all ID starts from 1, therefore, 0 means NO suitable VM exists.
         int choosedHolderID = 0;

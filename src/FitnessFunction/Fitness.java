@@ -1,10 +1,12 @@
 package FitnessFunction;
-import  DataCenterEntity.*;
 
+
+import DataCenterEntity.DataCenter;
 
 public interface Fitness {
     // Transform multi resource into one scalar
     public double evaluate(
+                            DataCenter dataCenter,
                             double binCPUremain,
                             double binMEMremain,
                             double itemCPUrequire,

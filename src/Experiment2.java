@@ -4,6 +4,7 @@ import AllocationMethod.BestFit_Sub;
 import AllocationMethod.FirstFit;
 import DataCenterEntity.Container;
 import DataCenterEntity.DataCenter;
+import DataCenterEntity.DataCenterCombined;
 import FileHandlers.ReadConfigures;
 import FileHandlers.ReadFile;
 import FileHandlers.WriteFile;
@@ -11,6 +12,7 @@ import FitnessFunction.*;
 import OperationInterface.Allocation;
 import OperationInterface.PMCreation;
 import OperationInterface.VMCreation;
+import OperationInterface.VMSelectionCreation;
 import PM_Creation.SimplePM;
 import Preprocessing.LinearNormalize;
 import Preprocessing.Normalization;
@@ -84,7 +86,7 @@ public class Experiment2 {
                                 int pmCreationChoice
                                 ){
 
-        // test from case 50 to 100, always, because we used 0 to 49 to train
+        // test from case 50 to 100, always, because we have used 0 to 49 to train
         int[] testCases = {50, 100};
 
         // Each test case may have a different size (number of containers to be allocated)
@@ -187,16 +189,20 @@ public class Experiment2 {
         // Normalization method, pass the vm configuration
         Normalization norm = new LinearNormalize(vmCpu, vmMem, pmCpu, pmMem);
 
-        // selection fitness Function List
-        Fitness selectionFitnessfunc = null;
-        switch (selectionFitnessChoice){
-            case 0: selectionFitnessfunc = new SubMethod(norm); break;
-            case 1: selectionFitnessfunc = new SumMethod(norm); break;
-            case 2: selectionFitnessfunc = new MixedMethod(norm); break;
-            case 3: selectionFitnessfunc = new EvolvedMethod(norm); break;
-            case 4: selectionFitnessfunc = new DivMethod(norm); break;
-            default: selectionFitnessfunc = new SubMethod(norm);
-        }
+
+
+
+
+//        // selection fitness Function List
+//        Fitness selectionFitnessfunc = null;
+//        switch (selectionFitnessChoice){
+//            case 0: selectionFitnessfunc = new SubMethod(norm); break;
+//            case 1: selectionFitnessfunc = new SumMethod(norm); break;
+//            case 2: selectionFitnessfunc = new MixedMethod(norm); break;
+//            case 3: selectionFitnessfunc = new EvolvedMethod(norm); break;
+//            case 4: selectionFitnessfunc = new DivMethod(norm); break;
+//            default: selectionFitnessfunc = new SubMethod(norm);
+//        }
 
         // allocation fitness Function List
         Fitness allocationFitnessfunc = null;
@@ -210,6 +216,9 @@ public class Experiment2 {
         }
 
 
+        VMSelectionCreation evoSelectionCreation = new SeletionCreationMixedMethod.BestFit(allocationFitnessfunc);
+
+
         /* Four allocation strategies will be used in the experiments
             VMCreation: when there is no suitable VM exist. Create a new one.
                         VMCreation decides the size of VM.
@@ -219,14 +228,14 @@ public class Experiment2 {
             PMCreation: Create a PM when there is suitable PM exist
          */
 
-        VMCreation vmCreationRule = null;
-        switch (vmCreationChoice){
-            case 0: vmCreationRule = new Simple(); break;
-            case 1: vmCreationRule = new Largest(); break;
-            case 2: vmCreationRule = new OSProportion(); break;
-            default: vmCreationRule =  new Simple();
-        }
-
+//        VMCreation vmCreationRule = null;
+//        switch (vmCreationChoice){
+//            case 0: vmCreationRule = new Simple(); break;
+//            case 1: vmCreationRule = new Largest(); break;
+//            case 2: vmCreationRule = new OSProportion(); break;
+//            default: vmCreationRule =  new Simple();
+//        }
+//
         Allocation vmAllocationRule = null;
         switch (vmAllocationChoice){
             case 0:
@@ -239,19 +248,19 @@ public class Experiment2 {
             default: vmAllocationRule = new FirstFit();
         }
 
-        Allocation vmSelectionRule = null;
-        switch (vmSelectionChoice){
-            case 0:
-                // both sub rule and sum rule require the residual or balance to be minimized
-                if(selectionFitnessChoice == 1 || selectionFitnessChoice == 0 || selectionFitnessChoice == 2)
-                    vmSelectionRule = new BestFit_Sub(selectionFitnessfunc);
-                else vmSelectionRule = new BestFit(selectionFitnessfunc);
-                break;
-            case 1: vmSelectionRule = new FirstFit(); break;
-            case 2: vmSelectionRule = new AnyFit(); break;
-            default: vmSelectionRule = new FirstFit();
-        }
-
+//        Allocation vmSelectionRule = null;
+//        switch (vmSelectionChoice){
+//            case 0:
+//                // both sub rule and sum rule require the residual or balance to be minimized
+//                if(selectionFitnessChoice == 1 || selectionFitnessChoice == 0 || selectionFitnessChoice == 2)
+//                    vmSelectionRule = new BestFit_Sub(selectionFitnessfunc);
+//                else vmSelectionRule = new BestFit(selectionFitnessfunc);
+//                break;
+//            case 1: vmSelectionRule = new FirstFit(); break;
+//            case 2: vmSelectionRule = new AnyFit(); break;
+//            default: vmSelectionRule = new FirstFit();
+//        }
+//
         PMCreation pmCreationRule = null;
         switch (pmCreationChoice){
             case 0: pmCreationRule = new SimplePM();
@@ -277,10 +286,10 @@ public class Experiment2 {
             }
 
             // For each test case, we create a new empty data center
-            DataCenter myDataCenter = new DataCenter(
+            DataCenterCombined myDataCenter = new DataCenterCombined(
                     resultPath,
                     pmEnergy, k, pmCpu, pmMem, vmCpu, vmMem, osProb,
-                    vmAllocationRule, vmSelectionRule, vmCreationRule, pmCreationRule);
+                    vmAllocationRule, evoSelectionCreation, pmCreationRule);
 
 //            Initialize the data center
             ArrayList<Double[]> pmList = initPM.get(testCase);

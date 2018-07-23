@@ -1,4 +1,5 @@
 package FitnessFunction;
+import DataCenterEntity.DataCenter;
 import Preprocessing.Normalization;
 
 
@@ -21,6 +22,7 @@ public class SumMethod implements Fitness {
 
     // Preprocessing on the multi-dimensional resources transform multiple resources into one scalar
     public double evaluate(
+                        DataCenter dataCenter,
                         double binCPUremain,
                         double binMEMremain,
                         double itemCPUrequire,

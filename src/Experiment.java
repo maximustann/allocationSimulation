@@ -104,7 +104,8 @@ public class Experiment {
             VMConfig_small
          */
 //        String VMConfig = "VMConfig_small";
-        String VMConfig = "VMConfig_xSmall";
+//        String VMConfig = "VMConfig_xSmall";
+        String VMConfig = "VMConfig_xSmall_balanced";
         String VMConfigPath = ConfigPath + VMConfig + ".csv";
 
 
@@ -114,7 +115,8 @@ public class Experiment {
             PMConfig_small
          */
 //        String PMConfig = "PMConfig_small";
-        String PMConfig = "PMConfig_xSmall";
+//        String PMConfig = "PMConfig_xSmall";
+        String PMConfig = "PMConfig_xSmall_balanced";
         String PMConfigPath = ConfigPath + PMConfig + ".csv";
 
         String osChoosed = null;

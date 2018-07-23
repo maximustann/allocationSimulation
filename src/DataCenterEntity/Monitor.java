@@ -8,15 +8,21 @@ import FileHandlers.*;
 public class Monitor {
     WriteFile writeFile;
     private ArrayList<Double> energyList;
+    private ArrayList<Double> accEnergyList;
 
     public Monitor(){
         writeFile = new WriteFile();
         energyList = new ArrayList<Double>();
+        accEnergyList = new ArrayList<Double>();
     }
 
 
     public void addEnergy(Double energy){
         energyList.add(Math.round(energy * 100) / 100.0);
+    }
+
+    public void addAccEnergy(Double energy){
+        accEnergyList.add(Math.round(energy * 100) / 100.0);
     }
 
     public void writeEnergy(String path){
@@ -29,7 +35,7 @@ public class Monitor {
 
     public void writeAccEnergy(String path){
         try {
-            writeFile.writeAccumulatedEnergy(path, energyList);
+            writeFile.writeAccumulatedEnergy(path, accEnergyList);
         } catch (IOException e1){
             e1.printStackTrace();
         }

@@ -1,5 +1,6 @@
 package DataCenterEntity;
 
+import javax.sound.midi.Soundbank;
 import java.util.*;
 
 public class VM implements Holder {
@@ -7,7 +8,10 @@ public class VM implements Holder {
 
     // This is a global variable. It will be incremented by 1 whenever a new VM is created
     // This variable is useful because it prevents duplicated vmID
-    static int vmCounter = 0;
+    private static int vmCounter = 0;
+
+    //save point for vmCounter
+    private static int savePoint_vmCounter = 0;
 
     // We fix the overhead of CPU and MEM according to Mann's paper
     public static double CPU_OVERHEAD_RATE = 0.1;
@@ -193,6 +197,8 @@ public class VM implements Holder {
 //                System.out.println("After OS: " + os);
             } else {
                 System.out.println("ERROR: container allocation failed, insufficient resources");
+                System.out.println("Container CPU = " + container.getCpu_configuration() + ", " +
+                        "Mem = " + container.getMem_configuration());
             }
             // There is an existing OS.
         } else {
@@ -319,7 +325,26 @@ public class VM implements Holder {
         return id;
     }
 
+    // make sure the id is consistent with the global counter!!!
+    public void setID(int id) {
+        this.id = id;
+    }
+
     public static void resetCounter(){
         vmCounter = 0;
+    }
+
+    public static int getGlobalCounter(){
+        return vmCounter;
+    }
+    public static void setGlobalCounter(int counter){
+        vmCounter = counter;
+    }
+    public static void saveCounter(){
+        savePoint_vmCounter = vmCounter;
+    }
+
+    public static void restoreCounter(){
+        vmCounter = savePoint_vmCounter;
     }
 }

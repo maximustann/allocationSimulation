@@ -1,5 +1,7 @@
 package AllocationMethod;
 
+import DataCenterEntity.DataCenter;
+import DataCenterEntity.DataCenterInterface;
 import DataCenterEntity.Holder;
 import FitnessFunction.Fitness;
 import OperationInterface.Allocation;
@@ -65,7 +67,16 @@ public class AnyFit implements Allocation {
     public static final int VMALLOCATION = 1;
 
 
-    public int execute(ArrayList<? extends Holder> binList, Holder item, int flag){
+    public int execute(DataCenterInterface outDataCenter, Holder item, int flag){
+        //
+        DataCenter dataCenter = (DataCenter) outDataCenter;
+
+        ArrayList<? extends Holder> binList = null;
+        if(flag == VMALLOCATION)
+            binList = dataCenter.pmList;
+        else
+            binList = dataCenter.vmList;
+
         // init the choosedHolderID = 0,
         // all ID starts from 1, therefore, 0 means NO suitable Holder exists.
         int choosedHolderID = 0;
