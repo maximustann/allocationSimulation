@@ -1,9 +1,7 @@
 package AllocationMethod;
 
-import DataCenterEntity.DataCenter;
 import DataCenterEntity.DataCenterInterface;
 import DataCenterEntity.Holder;
-import FitnessFunction.Fitness;
 import OperationInterface.Allocation;
 
 import java.util.ArrayList;
@@ -67,15 +65,13 @@ public class AnyFit implements Allocation {
     public static final int VMALLOCATION = 1;
 
 
-    public int execute(DataCenterInterface outDataCenter, Holder item, int flag){
-        //
-        DataCenter dataCenter = (DataCenter) outDataCenter;
+    public int execute(DataCenterInterface dataCenter, Holder item, int flag){
 
-        ArrayList<? extends Holder> binList = null;
+        ArrayList<? extends Holder> binList;
         if(flag == VMALLOCATION)
-            binList = dataCenter.pmList;
+            binList = dataCenter.getPmList();
         else
-            binList = dataCenter.vmList;
+            binList = dataCenter.getVmList();
 
         // init the choosedHolderID = 0,
         // all ID starts from 1, therefore, 0 means NO suitable Holder exists.
@@ -94,13 +90,13 @@ public class AnyFit implements Allocation {
         // check which vm is suitable for allocation
         for(int i = 0; i < binList.size(); ++i){
 
-            double cpu_require = item.getCpu_configuration();
-            double mem_require = item.getMem_configuration();
+            double cpu_require = item.getCpuConfiguration();
+            double mem_require = item.getMemConfiguration();
 
             int os_require = item.getExtraInfo();
 
-            double cpu_remain = binList.get(i).getCpu_remain();
-            double mem_remain = binList.get(i).getMem_remain();
+            double cpu_remain = binList.get(i).getCpuRemain();
+            double mem_remain = binList.get(i).getMemRemain();
             double os = binList.get(i).getExtraInfo();
 
             // If the resource and os requirement both suitable, add to the feasible list

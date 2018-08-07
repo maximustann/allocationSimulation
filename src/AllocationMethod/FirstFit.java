@@ -1,7 +1,8 @@
 package AllocationMethod;
 
 
-import DataCenterEntity.*;
+import DataCenterEntity.Holder;
+import DataCenterEntity.DataCenterInterface;
 import OperationInterface.*;
 import java.util.ArrayList;
 
@@ -53,19 +54,18 @@ public class FirstFit implements Allocation {
     final int VMSELECTION = 0;
     final int VMALLOCATION = 1;
 
-    public int execute(DataCenterInterface outDataCenter, Holder item, int flag) {
-        DataCenter dataCenter = (DataCenter) outDataCenter;
+    public int execute(DataCenterInterface dataCenter, Holder item, int flag) {
 
 
-        ArrayList<? extends Holder> binList = null;
+        ArrayList<? extends Holder> binList;
         if(flag == VMALLOCATION)
-            binList = dataCenter.pmList;
+            binList = dataCenter.getPmList();
         else
-            binList = dataCenter.vmList;
+            binList = dataCenter.getVmList();
 
-        // init the choosedVMID = 0,
+        // init the chosenVmID = 0,
         // all ID starts from 1, therefore, 0 means NO suitable VM exists.
-        int choosedHolderID = 0;
+        int chosenHolderID = 0;
 
 
         // No VM exists yet. Return 0
@@ -76,30 +76,30 @@ public class FirstFit implements Allocation {
 
         // Look for the VM which has sufficient resources on 2 dimensions
         // return the VM's ID
-        for (int i = 0; i < binList.size(); ++i) {
+        for (Holder bin:binList) {
 
             // If the current PM has enough resources
             // VM allocation, select a PM for a VM
             if (flag == VMALLOCATION) {
-                if (binList.get(i).getCpu_remain() >= item.getCpu_configuration() &&
-                        binList.get(i).getMem_remain() >= item.getMem_configuration()) {
-                        choosedHolderID = binList.get(i).getID();
+                if (bin.getCpuRemain() >= item.getCpuConfiguration() &&
+                        bin.getMemRemain() >= item.getMemConfiguration()) {
+                        chosenHolderID = bin.getID();
                         break;
                     }
                     // If the current VM has enough resources
                     // VM selection, select a VM for a container
-                // Here, for contianer, the .getCpu_configuration() and .getCpu_used() methods retrieve
+                // Here, for container, the .getCpu_configuration() and .getCpu_used() methods retrieve
                 // exact the same value, therefore, they can be alternated.
                 } else {
-                    if (binList.get(i).getCpu_remain() >= item.getCpu_configuration() &&
-                            binList.get(i).getMem_remain() >= item.getMem_configuration() &&
-                            binList.get(i).getExtraInfo() == item.getExtraInfo()) {
-                        choosedHolderID = binList.get(i).getID();
+                    if (bin.getCpuRemain() >= item.getCpuConfiguration() &&
+                            bin.getMemRemain() >= item.getMemConfiguration() &&
+                            bin.getExtraInfo() == item.getExtraInfo()) {
+                        chosenHolderID = bin.getID();
                         break;
                     } // End If
                 } // End Else
             } // End for
 
-            return choosedHolderID;
+            return chosenHolderID;
         } // End execute
 } // End class

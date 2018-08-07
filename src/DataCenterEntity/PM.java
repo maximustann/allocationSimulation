@@ -5,7 +5,7 @@ import java.util.*;
 public class PM implements Holder {
     // This is a global variable. It will be incremented by 1 whenever a new PM is created
     // This variable is useful because it prevents duplicated pmID
-    static int pmCounter = 0;
+    private static int pmCounter = 0;
 
 
     static double CLOSED = 0;
@@ -14,40 +14,41 @@ public class PM implements Holder {
     // id starts from 1
     private int id;
     // configuration is how PM is configured
-    private double cpu_configuration;
-    private double mem_configuration;
+    private double cpuConfiguration;
+    private double memConfiguration;
 
-    // allocated is the resource that allocate to VMs according to VM's size
-    private double cpu_remain;
-    private double mem_remain;
+    // _remain is the boundary of allocation
+    // for example, give a PM CPU = 6600, allocate a VM CPU = 3300,
+    // cpu_remain = 6600 - 3300 = 3300
+    private double cpuRemain;
+    private double memRemain;
 
     // used is the acutual used of resources by containers and VM overheads
-    private double cpu_used;
-    private double mem_used;
+    private double cpuUsed;
+    private double memUsed;
 
     // utilization is calculate as: used / configuration
-    private double cpu_utilization;
-    private double mem_utilization;
+    private double cpuUtilization;
+    private double memUtilization;
     private double status;
     private double k;
     private double maxEnergy;
     private ArrayList<VM> vmList;
-    private HashMap VMIDtoListIndex;
+    private HashMap vmIDtoListIndex;
     private double energyConsumption;
 
     public PM(double cpu, double mem, double k, double maxEnergy) {
         // initialize cpu and memory
-        cpu_configuration = cpu;
-        mem_configuration = mem;
-        cpu_used = 0;
-        mem_used = 0;
-        cpu_remain = cpu;
-        mem_remain = mem;
+        cpuConfiguration = cpu;
+        memConfiguration = mem;
+        cpuUsed = 0;
+        memUsed = 0;
+        cpuRemain = cpu;
+        memRemain = mem;
 
         // initialize the vmList and map
         vmList = new ArrayList<>();
-        VMIDtoListIndex = new HashMap();
-        this.status = status;
+        vmIDtoListIndex = new HashMap();
         this.k = k;
         this.maxEnergy = maxEnergy;
 
@@ -60,9 +61,9 @@ public class PM implements Holder {
     // Balance should always be in [0, 1], the closer to 1, the more balance
     public double getBalance(){
         double balance = 0;
-        if(cpu_utilization >= mem_utilization)
-            balance = mem_utilization / cpu_utilization;
-        else balance = cpu_utilization / mem_utilization;
+        if(cpuUtilization >= memUtilization)
+            balance = memUtilization / cpuUtilization;
+        else balance = cpuUtilization / memUtilization;
         return balance;
     }
 
@@ -78,80 +79,80 @@ public class PM implements Holder {
 
     // according to a famous energy function
     public double calEnergy(){
-        energyConsumption = k * maxEnergy + (1 - k) * cpu_utilization * maxEnergy;
+        energyConsumption = k * maxEnergy + (1 - k) * cpuUtilization * maxEnergy;
         return energyConsumption;
     }
 
     // check
-    private void updateCpuUitlization(){
-        cpu_utilization = cpu_used / cpu_configuration;
+    private void updateCpuUtilization(){
+        cpuUtilization = cpuUsed / cpuConfiguration;
     }
 
     //check
-    private void updateMemUitlization(){
-        mem_utilization = mem_used / mem_configuration;
+    private void updateMemUtilization(){
+        memUtilization = memUsed / memConfiguration;
     }
 
-    public double getCpu_utilization() {
-        return cpu_utilization;
+    public double getCpuUtilization() {
+        return cpuUtilization;
     }
 
-    public double getMem_utilization() {
-        return mem_utilization;
+    public double getMemUtilization() {
+        return memUtilization;
     }
 
     // add VM, update CPU
     private void addCpu(VM vm){
         // cpu_remain to the VM is NOT the actual use of the CPU resource. It is a constraint.
-        cpu_remain -= vm.getCpu_configuration();
+        cpuRemain -= vm.getCpuConfiguration();
 
         // cpu_used is the actual used of VM which includes all the containers and overhead of the VM
-        cpu_used += vm.getCpu_used();
+        cpuUsed += vm.getCpuUsed();
 //        System.out.println("After add: " + cpu_remain);
 
         // update CPU utilization
-        updateCpuUitlization();
+        updateCpuUtilization();
     }
 
     // remove VM, update CPU
     private void removeCpu(VM vm){
-        cpu_remain += vm.getCpu_configuration();
-        cpu_used -= vm.getCpu_used();
-        updateCpuUitlization();
+        cpuRemain += vm.getCpuConfiguration();
+        cpuUsed -= vm.getCpuUsed();
+        updateCpuUtilization();
     }
 
     // add VM, update MEM
     private void addMem(VM vm){
-        mem_remain -= vm.getMem_configuration();
-        mem_used += vm.getMem_used();
-        updateMemUitlization();
+        memRemain -= vm.getMemConfiguration();
+        memUsed += vm.getMemUsed();
+        updateMemUtilization();
     }
 
     // remove VM, update MEM
     private void removeMem(VM vm){
-        mem_remain += vm.getMem_configuration();
-        mem_used -= vm.getMem_used();
-        updateMemUitlization();
+        memRemain += vm.getMemConfiguration();
+        memUsed -= vm.getMemUsed();
+        updateMemUtilization();
     }
 
     // get cpu_remain
-    public double getCpu_remain(){
-        return cpu_remain;
+    public double getCpuRemain(){
+        return cpuRemain;
     }
 
     // get mem_remain
-    public double getMem_remain(){
-        return mem_remain;
+    public double getMemRemain(){
+        return memRemain;
     }
 
     // check
-    public double getCpu_used(){
-        return cpu_used;
+    public double getCpuUsed(){
+        return cpuUsed;
     }
 
     // check
-    public double getMem_used(){
-        return mem_used;
+    public double getMemUsed(){
+        return memUsed;
     }
 
 
@@ -159,26 +160,24 @@ public class PM implements Holder {
     // Whenever a new container is allocated to an hosted VM, this container bring new resource consumption
     // Therefore, we need to update the cpu_used and mem_used
     public void allocateNewContainer(double containerCpu, double containerMem){
-//        System.out.println("Before allocate a container, cpu_used: " + cpu_used);
-        cpu_used += containerCpu;
-        mem_used += containerMem;
-        updateCpuUitlization();
-        updateMemUitlization();
-//        System.out.println("After allocate a container, cpu_used: " + cpu_used);
+        cpuUsed += containerCpu;
+        memUsed += containerMem;
+        updateCpuUtilization();
+        updateMemUtilization();
     }
 
     // This method is called by VM after release a container.
     public void releaseOldContainer(double containerCpu, double containerMem){
-        cpu_used -= containerCpu;
-        mem_used -= containerMem;
-        updateCpuUitlization();
-        updateMemUitlization();
+        cpuUsed -= containerCpu;
+        memUsed -= containerMem;
+        updateCpuUtilization();
+        updateMemUtilization();
     }
 
 
     /**
      * Add VM
-     * @param vm
+     * @param vm Virtual machine
      * @return vmList
      *
      * 1. Add the VM to the vmList
@@ -191,12 +190,12 @@ public class PM implements Holder {
         // Check if this PM has enough cpu and memory to allocate to this VM
         // If yes, add this VM to the vmList, update utilization
         // And update the mapping between VM ID and vmList index
-        if(cpu_remain >= vm.getCpu_configuration() && mem_remain >= vm.getMem_configuration()) {
+        if(cpuRemain >= vm.getCpuConfiguration() && memRemain >= vm.getMemConfiguration()) {
             int currentIndex = vmList.size();
             vmList.add(vm);
             addCpu(vm);
             addMem(vm);
-            VMIDtoListIndex.put(vm.getID(), currentIndex);
+            vmIDtoListIndex.put(vm.getID(), currentIndex);
 
             // call VM to add the host PM to its allocateTo
             vm.setAllocateTo(this);
@@ -216,7 +215,7 @@ public class PM implements Holder {
     // We first remove the vm from vmList
     // All the VM that behind the left VM, their index in the vmList will decrease by 1.
     public ArrayList<VM> removeVM(int vmID){
-        int vmIndex = (int) VMIDtoListIndex.get(vmID);
+        int vmIndex = (int) vmIDtoListIndex.get(vmID);
         VM vm = vmList.get(vmIndex);
         removeCpu(vm);
         removeMem(vm);
@@ -226,10 +225,9 @@ public class PM implements Holder {
         vmList.remove(vmIndex);
 
         // Then, we update the VMIDtoIndex mapping
-        Iterator entries = VMIDtoListIndex.entrySet().iterator();
+        Iterator entries = vmIDtoListIndex.entrySet().iterator();
         while(entries.hasNext()){
             Map.Entry entry = (Map.Entry) entries.next();
-            Integer key = (Integer)entry.getKey();
             Integer value = (Integer)entry.getValue();
             if(value > vmIndex){
                 value -= 1;
@@ -255,22 +253,22 @@ public class PM implements Holder {
 
     public void print(){
         System.out.println("PM ID: " + id +
-                ", CPU: "+ Math.round(cpu_used * 100) / 100.0 +
-                ", Mem: " + Math.round(mem_used * 100) / 100.0 +
-                ", CPU remain: " + Math.round(cpu_remain * 100) / 100.0 +
-                ", Mem remain: " + Math.round(mem_remain * 100) / 100.0 +
-                ", CPU utilization: " + Math.round(cpu_utilization * 10000) / 10000.0 +
-                ", Mem utilization: " + Math.round(mem_utilization * 10000) / 10000.0 +
+                ", CPU: "+ Math.round(cpuUsed * 100) / 100.0 +
+                ", Mem: " + Math.round(memUsed * 100) / 100.0 +
+                ", CPU remain: " + Math.round(cpuRemain * 100) / 100.0 +
+                ", Mem remain: " + Math.round(memRemain * 100) / 100.0 +
+                ", CPU utilization: " + Math.round(cpuUtilization * 10000) / 10000.0 +
+                ", Mem utilization: " + Math.round(memUtilization * 10000) / 10000.0 +
                 ", energy: " + Math.round(calEnergy() * 100) / 100.0 +
                 ", number of containers = " + getContainerNum());
 //        for(VM vm:vmList) vm.print();
     }
 
     // return the number of all containers in all VMs in this PM
-    public int getContainerNum(){
+    private int getContainerNum(){
         int sum = 0;
-        for(int i = 0; i < vmList.size(); i++){
-            sum += vmList.get(i).getContainerNum();
+        for(VM vm:vmList){
+            sum += vm.getContainerNum();
         }
         return sum;
     }
@@ -284,15 +282,15 @@ public class PM implements Holder {
     public Integer getType(){
         return null;
     }
-    public double getCpu_configuration() {
-        return cpu_configuration;
+    public double getCpuConfiguration() {
+        return cpuConfiguration;
     }
 
-    public double getMem_configuration() {
-        return mem_configuration;
+    public double getMemConfiguration() {
+        return memConfiguration;
     }
 
-    public ArrayList getVMList(){
+    public ArrayList<VM> getVMList(){
         return vmList;
     }
 }

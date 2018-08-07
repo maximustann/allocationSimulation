@@ -64,7 +64,7 @@ public class BestFit implements Allocation {
     public static final int VMALLOCATION = 1;
 
 
-    Fitness fitnessFunction;
+    private Fitness fitnessFunction;
 
 
 
@@ -73,17 +73,15 @@ public class BestFit implements Allocation {
     }
 
 
-    public int execute(DataCenterInterface outDataCenter, Holder item, int flag){
-        DataCenter dataCenter = (DataCenter) outDataCenter;
+    public int execute(DataCenterInterface dataCenter, Holder item, int flag){
 
-        ArrayList<? extends Holder> binList = null;
+        ArrayList<? extends Holder> binList;
         if(flag == VMALLOCATION)
-            binList = dataCenter.pmList;
+            binList = dataCenter.getPmList();
         else
-            binList = dataCenter.vmList;
+            binList = dataCenter.getVmList();
 
 
-        // init the choosedHolderID = 0,
         // all ID starts from 1, therefore, 0 means NO suitable Holder exists.
         int choosedHolderID = 0;
         Double[] fitnessValue = new Double[binList.size()];
@@ -96,26 +94,16 @@ public class BestFit implements Allocation {
             return 0;
         }
 
-//        System.out.println("All the VMs = ");
-//        for(int i = 0; i < binList.size(); i++){
-//            binList.get(i).print();
-//        }
-//        System.out.println();
-
         // Look for the VM which has sufficient resources on 2 dimensions
         // return the VM's ID
-//        System.out.println("Now we have " + binList.size() + " number of VM");
-//        System.out.println("feasible solutions = ");
         for(int i = 0; i < binList.size(); ++i){
             fitnessValue[i] = fitnessFunction(dataCenter, binList.get(i), item, flag);
             // First VM
             if(tempFitness == null && fitnessValue[i] != null) {
                 tempFitness = fitnessValue[i];
-//                binList.get(i).print();
 
                 // should not be the index of the binList. should be holder ID !!!
                 choosedHolderID = binList.get(i).getID();
-//                System.out.println("First selection, selected " + choosedHolderID + " with fitness = " + fitnessValue[i]);
                 // Does not satisfy the requirement
             } else if(fitnessValue[i] == null){
                 continue;
@@ -123,32 +111,29 @@ public class BestFit implements Allocation {
                 // This is the core of BestFit
                 // A bigger tempFitness is better
             } else if(tempFitness < fitnessValue[i]){
-//                System.out.println("VM " + (i + 1) + " is better with " + fitnessValue[i] + " > " + tempFitness);
                 tempFitness = fitnessValue[i];
                 choosedHolderID = binList.get(i).getID();
-//                binList.get(i).print();
             }
         } // End for
 
-//        System.out.println("eventually selected " + choosedHolderID);
         return choosedHolderID;
     }
 
-    public Double fitnessFunction(DataCenter dataCenter, Holder bin, Holder item, int flag){
+    private Double fitnessFunction(DataCenterInterface dataCenter, Holder bin, Holder item, int flag){
 
-        Double fitnessValue = 0.0;
+        Double fitnessValue;
 
         // If it is VM allocation, AKA. no OS constraint.
         // We must use the configuration resources to test it.
         if(flag == VMALLOCATION){
-            if (bin.getCpu_remain() <= item.getCpu_configuration() ||
-                    bin.getMem_remain() <= item.getMem_configuration()) {
+            if (bin.getCpuRemain() <= item.getCpuConfiguration() ||
+                    bin.getMemRemain() <= item.getMemConfiguration()) {
                 return null;
             }
         // VM selection, has OS constraint. We must use the actual resources left to test it.
         } else {
-            if (bin.getCpu_remain() <= item.getCpu_used() ||
-                    bin.getMem_remain() <= item.getMem_used() ||
+            if (bin.getCpuRemain() <= item.getCpuUsed() ||
+                    bin.getMemRemain() <= item.getMemUsed() ||
                     bin.getExtraInfo() != item.getExtraInfo()
                     ) {
                 return null;
@@ -159,27 +144,21 @@ public class BestFit implements Allocation {
         if(flag == VMALLOCATION) {
             fitnessValue = fitnessFunction.evaluate(
                                             dataCenter,
-                                            bin.getCpu_remain(),
-                                            bin.getMem_remain(),
-                                            item.getCpu_configuration(),
-                                            item.getMem_configuration(),
-                                            null,
-                                            null);
+                                            bin.getCpuRemain(),
+                                            bin.getMemRemain(),
+                                            item.getCpuConfiguration(),
+                                            item.getMemConfiguration());
 
             //VM selection, we use the acutual residual resources
         } else{
             fitnessValue = fitnessFunction.evaluate(
                                         dataCenter,
-                                        bin.getCpu_remain(),
-                                        bin.getMem_remain(),
-                                        item.getCpu_used(),
-                                        item.getMem_used(),
-                                        null,
-                                        null);
+                                        bin.getCpuRemain(),
+                                        bin.getMemRemain(),
+                                        item.getCpuUsed(),
+                                        item.getMemUsed());
         }
 
-            //        System.out.println("container" + container.getID() + " allocate to VM" + vm.getID() + "fitness = " + fitnessValue);
-//        System.out.println();
         return fitnessValue;
     }
 }

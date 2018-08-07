@@ -17,16 +17,16 @@ public class ReadByCol implements ReadCsvFile{
 		File fd = new File(fileName);
 		double[][] myData = readCsv(fd, data.length);
 		for(int i = 0; i < data.length; i++){
-			for(int j = 0; j < data[0].length; j++) data[i][j] = myData[i][j];
+		    System.arraycopy(myData[i], 0, data[i], 0,data[0].length);
 		}
 	}
 
 	private double[][] readCsv(File fileName, int colNum){
-		BufferedReader br = null;
+		BufferedReader br;
 		double[][] content = null;
 		try {
 			br = new BufferedReader(new FileReader(fileName));
-			ArrayList<Double> col = new ArrayList<Double>();
+			ArrayList<Double> col = new ArrayList<>();
 			while((line = br.readLine()) != null){
 				String[] con = line.split(csvSplitBy);
 				for(int j = 0; j < con.length; j++){

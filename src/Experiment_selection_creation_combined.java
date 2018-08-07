@@ -1,29 +1,41 @@
-
+import AllocationMethod.AnyFit;
+import AllocationMethod.BestFit;
+import AllocationMethod.BestFit_Sub;
+import AllocationMethod.FirstFit;
+import DataCenterEntity.Container;
+import DataCenterEntity.DataCenter;
+import DataCenterEntity.DataCenterCombined;
 import FileHandlers.ReadConfigures;
 import FileHandlers.ReadFile;
+import FileHandlers.WriteFile;
+import FitnessFunction.*;
+import OperationInterface.Allocation;
+import OperationInterface.PMCreation;
+import OperationInterface.VMCreation;
+import OperationInterface.VMSelectionCreation;
+import PM_Creation.SimplePM;
+import Preprocessing.LinearNormalize;
+import Preprocessing.Normalization;
+import SeletionCreationMixedMethod.BestFitFramework;
+import SeletionCreationMixedMethod.NonAnyFitFramework;
+import VM_Creation.LargestC;
+import VM_Creation.OSProportion;
+import VM_Creation.SimpleC;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import DataCenterEntity.*;
-import FileHandlers.WriteFile;
-import FitnessFunction.*;
-import OperationInterface.*;
-import PM_Creation.SimplePM;
-import Preprocessing.LinearNormalize;
-import Preprocessing.Normalization;
-import AllocationMethod.*;
-import VM_Creation.*;
-
-public class Experiment {
+public class Experiment_selection_creation_combined {
     public static void main(String[] args) throws IOException {
-
         // Test Scenarios
         final int REALWORLD_SMALL = 0;
         final int BALANCED_DATA_SMALL = 1;
         final int BALANCED_VM_SMALL = 2;
+        final int REALWORLD = 3;
+        final int BALANCED_DATA = 4;
+
         // Fitness functions
         final int SUB_METHOD = 0;
         final int SUM_METHOD = 1;
@@ -62,9 +74,9 @@ public class Experiment {
                         REALWORLD_SMALL,
                         MEDIUM,
                         TWO,
-                        EVO_METHOD,
                         SUB_METHOD,
-                        LARGEST,
+                        SUB_METHOD,
+                        SIMPLE,
                         FIRSTFIT,
                         BESTFIT,
                         SIMPLEPM);
@@ -84,7 +96,7 @@ public class Experiment {
                                 int pmCreationChoice
                                 ){
 
-        // test from case 50 to 100, always, because we used 0 to 49 to train
+        // test from case 50 to 100, always, because we have used 0 to 49 to train
         int[] testCases = {50, 100};
 
         // Each test case may have a different size (number of containers to be allocated)
@@ -95,13 +107,10 @@ public class Experiment {
         int vmTypes = 5;
 
         // These are the addresses of test cases
+//        String base = "/Users/maximustann/Work/allocationSimulation/BilevelData/dataset";
         String base = "/home/tanboxi/IdeaProjects/MaxTan/data/";
         String ConfigPath = base + "/baseConfig/";
         String testCaseFilesPath = base + "/containerData/";
-
-
-
-
         String initEnvPath = base + "/InitEnv/";
         String osProPath = base + "/OSPro/";
         String osPath = base + "/OSData/";
@@ -111,16 +120,21 @@ public class Experiment {
         String VMConfig;
         String PMConfig;
         switch (testScenario){
-            case 0: // Real world small
-            case 1: // Balanced container (data)
+            case 0: // Realworld small
+            case 1: // Balanced container (data) small
                 VMConfig = "VMConfig/VMConfig_xSmall";
                 PMConfig = "PMConfig/PMConfig_xSmall";
                 break;
-            case 2: // Balanced container and VM
+            case 2: // Balanced container and VM small
                 VMConfig = "VMConfig/VMConfig_xSmall_balanced";
                 PMConfig = "PMConfig/PMConfig_xSmall_balanced";
                 break;
 
+            case 3: // Real world
+            case 4: // Balanced container
+                VMConfig = "VMConfig/VMConfig_small";
+                PMConfig = "PMConfig/PMConfig_small";
+                break;
             default:
                 PMConfig = "PMConfig/PMConfig_xSmall";
                 VMConfig = "VMConfig/VMConfig_xSmall";
@@ -130,60 +144,62 @@ public class Experiment {
 
 
 
-        String chosenOS = null;
+        String osChoosed = null;
         switch(osChoice){
-            case 1: chosenOS = "OS1"; break;
-            case 2: chosenOS = "OS2"; break;
-            case 3: chosenOS = "OS3"; break;
-            case 5: chosenOS = "OS5"; break;
-            default: chosenOS = "OS3";
+            case 1: osChoosed = "OS1"; break;
+            case 2: osChoosed = "OS2"; break;
+            case 3: osChoosed = "OS3"; break;
+            case 5: osChoosed = "OS5"; break;
+            default: osChoosed = "OS3";
         }
 
-        osProPath += (chosenOS + "/probability.csv");
+        osProPath += (osChoosed + "/probability.csv");
 
-        String chosenTestCase = null;
+        String testCaseChoosed = null;
         String testCaseRoot = null;
         switch(testCaseSizeChoice){
             case 0:
                     testCaseRoot = "Container80";
-                    chosenTestCase = testCaseRoot + "/";
+                    testCaseChoosed = testCaseRoot + "/";
                     testCaseSize[0] = 80;
                     Arrays.fill(testCaseSize, 0, 50, 80);
                     break;
             case 1:
-                testCaseRoot = "Container200";
-                switch (testScenario){
-                    case 0: // realworld smalL
-                         chosenTestCase = testCaseRoot + "_REALWORLD_SMALL/";
-                         break;
-                    case 1: // balanced container (data) small
-                        chosenTestCase = testCaseRoot + "_BALANCED_SMALL/";
-                        break;
-                    case 2: // balanced container and VM small
-                        chosenTestCase = testCaseRoot + "_BALANCED_VM_SMALL/";
-                        break;
+                    testCaseRoot = "Container200";
+                    switch (testScenario){
+                        case 0: // realworld smalL
+                            testCaseChoosed = testCaseRoot + "_REALWORLD_SMALL/";
+                            break;
+                        case 1: // balanced container (data) small
+                            testCaseChoosed = testCaseRoot + "_BALANCED_SMALL/";
+                            break;
+                        case 2: // balanced container and VM small
+                            testCaseChoosed = testCaseRoot + "_BALANCED_VM_SMALL/";
+                            break;
 
-                    default:
-                        chosenTestCase = testCaseRoot + "_REALWORLD_SMALL/";
-                }
+                        default:
+                            testCaseChoosed = testCaseRoot + "_REALWORLD_SMALL/";
+                    }
+
                     testCaseSize[0] = 200;
                     Arrays.fill(testCaseSize, 0, 50, 200);
                     break;
             case 2:
                     testCaseRoot = "Container5000";
-                    chosenTestCase = testCaseRoot + "/";
+                    testCaseChoosed = testCaseRoot + "/";
                     testCaseSize[0] = 5000;
                     Arrays.fill(testCaseSize, 0, 50, 5000);
                     break;
             default:
                     testCaseRoot = "Container80";
-                    chosenTestCase = testCaseRoot + "/";
+                    testCaseChoosed = testCaseRoot + "/";
                     testCaseSize[0] = 80;
                     Arrays.fill(testCaseSize, 0, 50, 80);
         }
-        testCaseFilesPath += chosenTestCase;
-        osPath += (chosenOS + testCaseRoot + "/");
-        initEnvPath += (chosenOS + "/" + chosenTestCase);
+        testCaseFilesPath += testCaseChoosed;
+        osPath += (osChoosed + testCaseRoot + "/");
+        initEnvPath += (osChoosed + "/" + testCaseChoosed);
+        System.out.println("initEnvPath = " + initEnvPath);
 
 
         // WriteFile instance
@@ -195,8 +211,9 @@ public class Experiment {
                 testCaseSize, PMConfigPath, VMConfigPath,
                 testCaseFilesPath, osPath, osProPath);
 
+        // Read initialization files from disk
         ReadConfigures readEnvConfig = new ReadConfigures();
-
+//
         ArrayList <ArrayList> initPM = readEnvConfig.testCases(initEnvPath, "pm", testCases);
         ArrayList <ArrayList> initVM = readEnvConfig.testCases(initEnvPath, "vm", testCases);
         ArrayList <ArrayList> initOS = readEnvConfig.testCases(initEnvPath, "os", testCases);
@@ -216,71 +233,58 @@ public class Experiment {
         // Normalization method, pass the vm configuration
         Normalization norm = new LinearNormalize(pmCpu, pmMem);
 
-        // selection fitness Function List
-        Fitness selectionFitnessFunction = null;
-        switch (selectionFitnessChoice){
-            case 0: selectionFitnessFunction = new SubMethod(norm); break;
-            case 1: selectionFitnessFunction = new SumMethod(norm); break;
-            case 2: selectionFitnessFunction = new MixedMethod(norm); break;
-            case 3: selectionFitnessFunction = new EvolvedMethod(norm); break;
-            case 4: selectionFitnessFunction = new DivMethod(norm); break;
-            default: selectionFitnessFunction = new SubMethod(norm);
-        }
 
-        // allocation fitness Function List
-        Fitness allocationFitnessFunction = null;
+
+        // allocationFitnessFunc is used in vmAllocation: allocate VMs to PMs
+        Fitness allocationFitnessfunc = null;
         switch(allocationFitnessChoice){
-            case 0: allocationFitnessFunction = new SubMethod(norm); break;
-            case 1: allocationFitnessFunction = new SumMethod(norm); break;
-            case 2: allocationFitnessFunction = new MixedMethod(norm); break;
-            case 3: allocationFitnessFunction = new EvolvedMethod(norm); break;
-            case 4: allocationFitnessFunction = new DivMethod(norm);break;
-            default: allocationFitnessFunction = new SubMethod(norm);
+            case 0: allocationFitnessfunc = new SubMethod(norm); break;
+            case 1: allocationFitnessfunc = new SumMethod(norm); break;
+            case 2: allocationFitnessfunc = new MixedMethod(norm); break;
+            case 3: allocationFitnessfunc = new EvolvedMethod(norm); break;
+            case 4: allocationFitnessfunc = new DivMethod(norm);break;
+            default: allocationFitnessfunc = new SubMethod(norm);
         }
 
 
-        /* Four allocation strategies will be used in the experiments
-            VMCreation: when there is no suitable VM exist. Create a new one.
-                        VMCreation decides the size of VM.
-
-            Allocation: Choose VM/PM from existed VM/PM to allocate a container/VM
-
-            PMCreation: Create a PM when there is suitable PM exist
-         */
-
-        VMCreation vmCreationRule = null;
+        // VM creation rule is still used in BestFit
+        VMCreation vmCreation = null;
         switch (vmCreationChoice){
-            case 0: vmCreationRule = new Simple(); break;
-            case 1: vmCreationRule = new Largest(); break;
-            case 2: vmCreationRule = new OSProportion(); break;
-            default: vmCreationRule =  new Simple();
+            case 0: vmCreation = new SimpleC(); break;
+            case 1: vmCreation = new LargestC(); break;
+            case 2: vmCreation = new OSProportion(); break;
+            default: vmCreation = new SimpleC();
         }
 
+        VMSelectionCreation selectionCreation = null;
+        switch(selectionFitnessChoice){
+            case 0: // ANYFIT framework
+                selectionCreation = new BestFitFramework(allocationFitnessfunc, vmCreation);
+                break;
+            case 3: // NON-ANYFIT framework, Evolved method
+                selectionCreation = new NonAnyFitFramework(new EvolvedMethod(norm));
+                break;
+            default:
+                selectionCreation = new BestFitFramework(allocationFitnessfunc, vmCreation);
+        }
+
+//        VMSelectionCreation evoSelectionCreation = new SeletionCreationMixedMethod.BestFit(allocationFitnessfunc);
+
+        // vmAllocationRule is used when allocating VMs to PMs
         Allocation vmAllocationRule = null;
         switch (vmAllocationChoice){
-            case 0:
-                // both sub rule and sum rule require the residual or balance to be minimized
-                if(allocationFitnessChoice == 1 || allocationFitnessChoice == 0 || allocationFitnessChoice == 2)
-                    vmAllocationRule = new BestFit_Sub(allocationFitnessFunction);
-                else vmAllocationRule = new BestFit(allocationFitnessFunction);
+            case 0: // BestFit
+                vmAllocationRule = new BestFit_Sub(allocationFitnessfunc);
                 break;
-            case 1: vmAllocationRule = new FirstFit(); break;
-            default: vmAllocationRule = new FirstFit();
+            case 1: // FirstFit
+                vmAllocationRule = new FirstFit();
+                break;
+            default: // FirstFit
+                vmAllocationRule = new FirstFit();
         }
 
-        Allocation vmSelectionRule = null;
-        switch (vmSelectionChoice){
-            case 0:
-                // both sub rule and sum rule require the residual or balance to be minimized
-                if(selectionFitnessChoice == 1 || selectionFitnessChoice == 0 || selectionFitnessChoice == 2)
-                    vmSelectionRule = new BestFit_Sub(selectionFitnessFunction);
-                else vmSelectionRule = new BestFit(selectionFitnessFunction);
-                break;
-            case 1: vmSelectionRule = new FirstFit(); break;
-            case 2: vmSelectionRule = new AnyFit(); break;
-            default: vmSelectionRule = new FirstFit();
-        }
 
+        // PM Creation rule remains SimplePM
         PMCreation pmCreationRule = null;
         switch (pmCreationChoice){
             case 0: pmCreationRule = new SimplePM();
@@ -288,8 +292,8 @@ public class Experiment {
 
         // accumulated energy arrayList for each test case
         ArrayList<Double> accumulatedEnergyList = new ArrayList<>();
-        ArrayList<Double> averageAccEnergyList = new ArrayList<>();
 
+        ArrayList<Double> averageAccEnergyList = new ArrayList<>();
 
 
         // Experiment starts here,
@@ -307,16 +311,16 @@ public class Experiment {
             }
 
             // For each test case, we create a new empty data center
-            DataCenter myDataCenter = new DataCenter(
+            DataCenterCombined myDataCenter = new DataCenterCombined(
                     pmEnergy, k, pmCpu, pmMem, vmCpu, vmMem, osProb,
-                    vmAllocationRule, vmSelectionRule, vmCreationRule, pmCreationRule);
+                    vmAllocationRule, selectionCreation, pmCreationRule);
 
 //            Initialize the data center
             ArrayList<Double[]> pmList = initPM.get(testCase);
             ArrayList<Double[]> vmList = initVM.get(testCase);
             ArrayList<Double[]> containerList = initContainer.get(testCase);
             ArrayList<Double[]> osList = initOS.get(testCase);
-//
+
             myDataCenter.initialization(pmList, vmList, containerList, osList);
             myDataCenter.print();
 //            System.out.println("After initialization = " + myDataCenter.calEnergy());
@@ -332,24 +336,26 @@ public class Experiment {
             for(int i = 0; i < testCaseSize[testCase]; ++i) {
 //                System.out.println();
 //                System.out.println("task = " + i + ", CPU = " + taskCpu[i] + ", MEM = " + taskMem[i] + ", OS = " + taskOS[i]);
-                // ID starts from 1
+//                 ID starts from 1
                 myDataCenter.receiveContainer(new Container(taskCpu[i], taskMem[i], taskOS[i], i));
 //                myDataCenter.print();
             }
             //
             myDataCenter.monitor.writeEnergy(resultPath);
             myDataCenter.monitor.writeAccEnergy(resultPath);
+            myDataCenter.monitor.writeWaste(resultPath);
             myDataCenter.print();
-
+//
             System.out.println("Current Energy: " + myDataCenter.calEnergy());
             System.out.println("Accumulated Energy: " + myDataCenter.getAccumulatedEnergyConsumption());
 //             Round to two decimal point
             accumulatedEnergyList.add(Math.round(myDataCenter.getAccumulatedEnergyConsumption() * 100) / 100.0);
+//
 //            for each test case calculate the average acc energy
             averageAccEnergyList.add(Math.round(myDataCenter.getAccumulatedEnergyConsumption() * 100) / 100.0 / 200);
 //             Destroy this data Center, save status data
             myDataCenter.selfDestruction(resultPath);
-        }
+        } // End test Case
 
 
         try {

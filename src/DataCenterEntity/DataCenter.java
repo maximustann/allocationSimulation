@@ -2,8 +2,6 @@ package DataCenterEntity;
 
 import OperationInterface.*;
 
-import java.io.File;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -11,12 +9,8 @@ import java.util.HashMap;
 public class DataCenter implements DataCenterInterface{
 
     // static data
-    public static final boolean FAILED = false;
-    public static final boolean CLOSED = false;
-    public static final boolean OPEN = true;
-    public static final boolean ALLOCATED = true;
-    public static final int VMALLOCATION = 1;
-    public static final int VMSELECTION = 0;
+    private static final int VMALLOCATION = 1;
+    private static final int VMSELECTION = 0;
 
     // scheduling methods
     private Allocation vmAllocation;
@@ -25,63 +19,62 @@ public class DataCenter implements DataCenterInterface{
     private PMCreation pmCreation;
 
     // List of PMs and List of VMs
-    public ArrayList<PM> pmList;
-    public ArrayList<VM> vmList;
+    private ArrayList<PM> pmList;
+    private ArrayList<VM> vmList;
 
     // List of container CPU collection and Mem collection
-    public ArrayList<Double> CoCpuList;
-    public ArrayList<Double> CoMemList;
+    private ArrayList<Double> coCpuList;
+    private ArrayList<Double> coMemList;
 
     // Accumulated Energy consumption
     private double accumulatedEnergyConsumption = 0;
 
     // parameters
-    private double maxEnergy;
-    private double k;
-    private double pmCpu;
-    private double pmMem;
+    private final double maxEnergy;
+    private final double k;
+    private final double pmCpu;
+    private final double pmMem;
     private double[] vmCpu;
     private double[] vmMem;
     private double[] osProb;
-    private String base;
 
 
 
     // max/min value of containers
-    public double maxCpu;
-    public double minCpu;
+    private double maxCpu;
+    private double minCpu;
 
-    public double maxMem;
-    public double minMem;
+    private double maxMem;
+    private double minMem;
 
 
     // median value of containers
-    public double CoCpuMedian;
-    public double CoMemMedian;
+    private double coCpuMedian;
+    private double coMemMedian;
 
-    public double normalizedCoCpuMedian;
-    public double normalizedCoMemMedian;
+    private double normalizedCoCpuMedian;
+    private double normalizedCoMemMedian;
 
     // Mode of containers
-    public double CoCpuMode;
-    public double CoMemMode;
-    public int interval;
+    private double coCpuMode;
+    private double coMemMode;
+    private int interval;
 
-    public Double[] cpuBounds;
-    public Double[] memBounds;
-    public int[] cpuFreq;
-    public int[] memFreq;
+    private Double[] cpuBounds;
+    private Double[] memBounds;
+    private int[] cpuFreq;
+    private int[] memFreq;
 
 
     // normalized min/max value of containers
-    public double normalizedMinCpu;
-    public double normalizedMaxCpu;
-    public double normalizedMaxMem;
-    public double normalizedMinMem;
+    private double normalizedMinCpu;
+    private double normalizedMaxCpu;
+    private double normalizedMaxMem;
+    private double normalizedMinMem;
 
     // These two HashMaps map ID to their index in the list.
-    private HashMap VMIDtoListIndex;
-    private HashMap PMIDtoListIndex;
+    private HashMap vmIDtoListIndex;
+    private HashMap pmIDtoListIndex;
 
 
     // Monitor update the latest information of the data center
@@ -89,7 +82,6 @@ public class DataCenter implements DataCenterInterface{
 
     // We initialize these parameters when the datacenter is created
     public DataCenter(
-            String base,
             double maxEnergy,
             double k,
             double pmCpu,
@@ -113,16 +105,17 @@ public class DataCenter implements DataCenterInterface{
         this.vmSelection = vmSelection;
         this.vmCreation = vmCreation;
         this.pmCreation = pmCreation;
-        this.VMIDtoListIndex = new HashMap();
-        this.PMIDtoListIndex = new HashMap();
-        this.base = base;
+        this.vmIDtoListIndex = new HashMap();
+        this.pmIDtoListIndex = new HashMap();
+
+        // a monitor to keep some temp data
         monitor = new Monitor();
 
 
-        pmList = new ArrayList<PM>();
-        vmList = new ArrayList<VM>();
-        CoCpuList = new ArrayList<Double>();
-        CoMemList = new ArrayList<Double>();
+        pmList = new ArrayList<>();
+        vmList = new ArrayList<>();
+        coCpuList = new ArrayList<>();
+        coMemList = new ArrayList<>();
         initialMode();
 
     }
@@ -141,6 +134,8 @@ public class DataCenter implements DataCenterInterface{
                             ArrayList<Double[]> initVmList,
                             ArrayList<Double[]> containerList,
                             ArrayList<Double[]> osList){
+
+
         int globalVMCounter = 0;
         // for each PM
         for(int i = 0; i < initPmList.size(); ++i){
@@ -172,7 +167,7 @@ public class DataCenter implements DataCenterInterface{
                 for(int conContainer = containers[0].intValue() - 1;
                         conContainer < containers[containers.length - 1].intValue();
                         ++conContainer){
-//                    System.out.println("conContainer = " + conContainer);
+
                     // Get the container's cpu and memory
                     Double[] cpuMem = containerList.get(conContainer);
                     //Create this container
@@ -182,25 +177,24 @@ public class DataCenter implements DataCenterInterface{
                     vm.addContainer(container);
                 } // Finish allocate containers to VMs
 
-
-
                 // add this vm to the data center vm list
                 this.vmList.add(vm);
 
                 // We map VM ID and its index in the vmList
-                VMIDtoListIndex.put(vm.getID(), this.vmList.size() - 1);
+                vmIDtoListIndex.put(vm.getID(), this.vmList.size() - 1);
 
             } // End  of each VM
+
             // we must update the globalVMCounter
             globalVMCounter += vms.length;
 
             // add this pm to the data center pm list
             this.pmList.add(pm);
-            PMIDtoListIndex.put(pm.getID(), this.pmList.size() - 1);
+            pmIDtoListIndex.put(pm.getID(), this.pmList.size() - 1);
 
         } // End of each PM
 
-        //calculate Energy consumption, not acculated...
+        //calculate Energy consumption, not accumulated energy
         updateAccumulatedEnergy();
 
         // save the current energy consumption
@@ -243,9 +237,42 @@ public class DataCenter implements DataCenterInterface{
         Arrays.fill(memFreq, 0);
 
     }
+
+    public ArrayList<PM> getPmList() {
+        return pmList;
+    }
+
+    public ArrayList<VM> getVmList() {
+        return vmList;
+    }
+
+    public double getK() {
+        return k;
+    }
+
+    public double getPmCpu() {
+        return pmCpu;
+    }
+
+    public double getPmMem() {
+        return pmMem;
+    }
+
+    public double[] getOsProb() {
+        return osProb;
+    }
+
+    public double[] getVmCpu() {
+        return vmCpu;
+    }
+
+    public double[] getVmMem() {
+        return vmMem;
+    }
+
     private void updateMode(Container container){
-        Double containerCPU = container.getCpu_configuration();
-        Double containerMem = container.getMem_configuration();
+        Double containerCPU = container.getCpuConfiguration();
+        Double containerMem = container.getMemConfiguration();
 
 
         // Count the frequency of cpu and memory in those intervals
@@ -285,66 +312,64 @@ public class DataCenter implements DataCenterInterface{
         }
 
         // calculate the mode for cpu and memory
-        CoCpuMode = (cpuBounds[maxCpuIndex] + cpuBounds[maxCpuIndex + 1]) / 2;
-        CoMemMode = (memBounds[maxMemIndex] + memBounds[maxMemIndex + 1]) / 2;
-//        System.out.println("CoCpuMode = " + CoCpuMode);
-//        System.out.println("CoMemMode = " + CoMemMode);
+        coCpuMode = (cpuBounds[maxCpuIndex] + cpuBounds[maxCpuIndex + 1]) / 2;
+        coMemMode = (memBounds[maxMemIndex] + memBounds[maxMemIndex + 1]) / 2;
     }
 
 
     private void updateMedian(Container container){
-        Double containerCPU = container.getCpu_configuration();
-        Double containerMem = container.getMem_configuration();
+        Double containerCPU = container.getCpuConfiguration();
+        Double containerMem = container.getMemConfiguration();
 
-        if(CoCpuList.size() == 0){
-            CoCpuList.add(containerCPU);
-            CoMemList.add(containerMem);
+        if(coCpuList.size() == 0){
+            coCpuList.add(containerCPU);
+            coMemList.add(containerMem);
             return;
         }
 
         // insert to the list
-        for(int i = 0; i < CoCpuList.size(); ++i){
-            if(containerCPU <= CoCpuList.get(i)){
-                CoCpuList.add(i, containerCPU);
+        for(int i = 0; i < coCpuList.size(); ++i){
+            if(containerCPU <= coCpuList.get(i)){
+                coCpuList.add(i, containerCPU);
                 break;
-            } else if(containerCPU > CoCpuList.get(i) && i == CoCpuList.size() - 1){
-                CoCpuList.add(containerCPU);
+            } else if(containerCPU > coCpuList.get(i) && i == coCpuList.size() - 1){
+                coCpuList.add(containerCPU);
                 break;
             }
         }
 
-        for(int i = 0; i < CoMemList.size() - 1; ++i){
-            if(containerMem <= CoMemList.get(i)){
-                CoMemList.add(i, containerMem);
+        for(int i = 0; i < coMemList.size() - 1; ++i){
+            if(containerMem <= coMemList.get(i)){
+                coMemList.add(i, containerMem);
                 break;
-            } else if(containerMem > CoMemList.get(i) && i == CoMemList.size() - 1){
-                CoMemList.add(containerMem);
+            } else if(containerMem > coMemList.get(i) && i == coMemList.size() - 1){
+                coMemList.add(containerMem);
                 break;
             }
         }
 
         // update the median value
-        if(CoCpuList.size() % 2 == 0){
-            CoCpuMedian = (CoCpuList.get(CoCpuList.size() / 2 - 1) + CoCpuList.get(CoCpuList.size() /  2)) / 2;
+        if(coCpuList.size() % 2 == 0){
+            coCpuMedian = (coCpuList.get(coCpuList.size() / 2 - 1) + coCpuList.get(coCpuList.size() /  2)) / 2;
         } else{
-            CoCpuMedian = CoCpuList.get((int) Math.floor(CoCpuList.size() / 2.0));
+            coCpuMedian = coCpuList.get((int) Math.floor(coCpuList.size() / 2.0));
         }
 
-        if(CoMemList.size() % 2 == 0){
-            CoMemMedian = (CoMemList.get(CoMemList.size() / 2 - 1) + CoMemList.get(CoMemList.size() /  2)) / 2;
+        if(coMemList.size() % 2 == 0){
+            coMemMedian = (coMemList.get(coMemList.size() / 2 - 1) + coMemList.get(coMemList.size() /  2)) / 2;
         } else{
-            CoMemMedian = CoMemList.get((int) Math.floor(CoMemList.size() / 2.0));
+            coMemMedian = coMemList.get((int) Math.floor(coMemList.size() / 2.0));
         }
 
-        normalizedCoCpuMedian = CoCpuMedian / pmCpu;
-        normalizedCoMemMedian = CoMemMedian / pmMem;
+        normalizedCoCpuMedian = coCpuMedian / pmCpu;
+        normalizedCoMemMedian = coMemMedian / pmMem;
 
     }
 
 
     private void updateMaxMin(Container container){
-        Double containerCPU = container.getCpu_configuration();
-        Double containerMem = container.getMem_configuration();
+        Double containerCPU = container.getCpuConfiguration();
+        Double containerMem = container.getMemConfiguration();
 
         if(maxCpu == 0) {
             maxCpu = containerCPU;
@@ -383,42 +408,42 @@ public class DataCenter implements DataCenterInterface{
     // This method is called when new container comes
     public void receiveContainer(Container container){
 
-        updateMedian(container);
-        updateMaxMin(container);
-        updateMode(container);
+//        updateMedian(container);
+//        updateMaxMin(container);
+//        updateMode(container);
 //        System.out.println();
-        int choosedVMID = vmSelection.execute(this, container, VMSELECTION);
+        int chosenVmID = vmSelection.execute(this, container, VMSELECTION);
 
 
 
         // If there is no suitable VM to select, then we will need to create a new one
-        if(choosedVMID == 0){
+        if(chosenVmID == 0){
 
             System.out.println("Create VM branch");
             // 1. We create a new VM
             // 2. Add the container to the new VM
             // 3. Add the new VM to the vmList
-            VM vm = vmCreation.execute(vmCpu, vmMem, container, osProb);
+            VM vm = vmCreation.execute(this, container);
 
             vm.addContainer(container);
-            int currentVMnum = vmList.size();
+            int currentVmNum = vmList.size();
             vmList.add(vm);
 
             // We map VM ID and its index in the vmList
-            VMIDtoListIndex.put(vm.getID(), currentVMnum);
+            vmIDtoListIndex.put(vm.getID(), currentVmNum);
 
             // After we created the vm, we will need to allocate it to a PM, and if there is no suitable PM,
             // We must create a new PM to accommodate and add the PM to pmList
-            int choosedPMID = vmAllocation.execute(this, vm, VMALLOCATION);
-            if(choosedPMID == 0){
+            int chosenPmID = vmAllocation.execute(this, vm, VMALLOCATION);
+            if(chosenPmID == 0){
                 PM pm = pmCreation.execute(pmCpu, pmMem, k, maxEnergy);
-                int currentPMnum = pmList.size();
+                int currentPmNum = pmList.size();
                 pm.addVM(vm);
                 pmList.add(pm);
 
 
                 // We map PM ID and its index in the pmList
-                PMIDtoListIndex.put(pm.getID(), currentPMnum);
+                pmIDtoListIndex.put(pm.getID(), currentPmNum);
 
                 // Allocate to an existing PM
             } else{
@@ -426,28 +451,19 @@ public class DataCenter implements DataCenterInterface{
                 // First, we look for PM's index in the list
                 // Then, we retrieve it from the list
                 // Finally, we add the VM to the PM.
-                PM choosedPM = pmList.get((int) PMIDtoListIndex.get(choosedPMID));
-                choosedPM.addVM(vm);
+                PM chosenPM = pmList.get((int) pmIDtoListIndex.get(chosenPmID));
+                chosenPM.addVM(vm);
 
             }
             // If there is a suitable VM, then allocate to this VM
         } else{
 
-//            System.out.println("VM Selection branch");
             // First, we look for VM's index in the list
             // Then, we retrieve it from the list
             // Finally, we add the container to the VM.
-            VM choosedVM = vmList.get((int) VMIDtoListIndex.get(choosedVMID));
-//            choosedVM.print();
-            choosedVM.addContainer(container);
+            VM chosenVM = vmList.get((int) vmIDtoListIndex.get(chosenVmID));
+            chosenVM.addContainer(container);
         }
-        // Recording happen in every 20 allocations
-//        int testCase = container.getID() + 1;
-//        if(testCase  % 20 == 0){
-//            File bF = new File(base + testCase + "/");
-//            if(!bF.exists()) bF.mkdir();
-//            monitor.writeStatusFiles(base + testCase + "/", pmList);
-//        }
 
         // After allocating a container, update the accumulated energy consumption of the current data center
         updateAccumulatedEnergy();
@@ -457,18 +473,18 @@ public class DataCenter implements DataCenterInterface{
         monitor.addAccEnergy(accumulatedEnergyConsumption);
     }
 
-    // Terminated this datacenter
+    // Terminated this data center
     public void selfDestruction(String resultPath){
         monitor.writeStatusFiles(resultPath, pmList);
         PM.resetCounter();
         VM.resetCounter();
     }
 
-    // Calculate the energy by suming up the energy consumption of all PMs
+    // Calculate the energy by sum up the energy consumption of all PMs
     public double calEnergy(){
         double energy = 0;
-        for(int i = 0; i < pmList.size(); ++i){
-            energy += pmList.get(i).calEnergy();
+        for(PM pm:pmList){
+            energy += pm.calEnergy();
         }
         return energy;
     }

@@ -41,6 +41,14 @@ public class WriteFile {
 		energyWriter.write(base + "energy.csv", energy);
 	}
 
+	// write Wasted Energy to file
+	// flag == 0: wasted cpu
+	// flag == 1: overhead
+	public void writeWaste(String base, ArrayList<Double> wastedCPU, ArrayList<Double>  wastedOverhead) throws IOException{
+		energyWriter.write(base + "wastedCPU.csv", wastedCPU);
+		energyWriter.write(base + "wastedOverhead.csv", wastedOverhead);
+	}
+
 	// write Acc Energy to file
 	public void writeAccumulatedEnergy(String base, ArrayList<Double> energy) throws IOException{
 		energyWriter.write(base + "AccumulatedEnergy.csv", energy);

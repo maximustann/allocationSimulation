@@ -1,9 +1,12 @@
 package VM_Creation;
 
-import DataCenterEntity.*;
+import DataCenterEntity.Container;
+import DataCenterEntity.DataCenterCombined;
+import DataCenterEntity.DataCenterInterface;
+import DataCenterEntity.VM;
 import OperationInterface.VMCreation;
 
-public class Largest implements VMCreation {
+public class LargestC implements VMCreation {
 
     /**
      * @param container
@@ -11,11 +14,12 @@ public class Largest implements VMCreation {
      */
     public VM execute(DataCenterInterface dataCenter, Container container){
 
-        DataCenter myDataCenter = (DataCenter) dataCenter;
+        DataCenterCombined myDataCenter = (DataCenterCombined) dataCenter;
         double[] vmCpu = myDataCenter.getVmCpu();
         double[] vmMem = myDataCenter.getVmMem();
 
         return new VM(vmCpu[vmCpu.length - 1], vmMem[vmMem.length - 1], vmCpu.length - 1);
+
     }
 
 

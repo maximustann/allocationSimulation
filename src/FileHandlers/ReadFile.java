@@ -45,10 +45,10 @@ public class ReadFile {
 
         this.VMTypes = VMTypes;
 
-        VMConfig = new double[(int) VMTypes][2];
+        VMConfig = new double[VMTypes][2];
         readByRow.read(VMConfigPath, VMConfig);
-        VMCpu = new double[(int) VMTypes];
-        VMMem = new double[(int) VMTypes];
+        VMCpu = new double[VMTypes];
+        VMMem = new double[VMTypes];
         for(int i = 0; i < VMTypes; ++i){
             VMCpu[i] = VMConfig[i][0];
             VMMem[i] = VMConfig[i][1];

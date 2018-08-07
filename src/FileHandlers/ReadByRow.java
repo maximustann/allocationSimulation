@@ -3,8 +3,8 @@ package FileHandlers;
 import java.io.*;
 
 public class ReadByRow implements ReadCsvFile {
-	String csvSplitBy;
-	String line;
+	private String csvSplitBy;
+	private String line;
 
 	public ReadByRow(){
 		csvSplitBy = ",";
@@ -17,13 +17,12 @@ public class ReadByRow implements ReadCsvFile {
 		double[][] temp = readCsv(fd, data.length, data[0].length);
 
 		for(int i = 0; i < data.length; i++){
-			for(int j = 0; j < data[0].length; j++)
-			data[i][j] = temp[i][j];
+		    System.arraycopy(temp[i], 0, data[i], 0, temp[i].length);
 		}
 	}
 
 	private double [][] readCsv(File fileName, int rowNum, int colNum){
-		BufferedReader br = null;
+		BufferedReader br;
 
 		double[][] content = new double[rowNum][colNum];
 		try {

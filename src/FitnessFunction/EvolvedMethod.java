@@ -1,7 +1,7 @@
  
 package FitnessFunction;
+import DataCenterEntity.DataCenterInterface;
 import Preprocessing.Normalization;
-import DataCenterEntity.DataCenter;
 
 /**
  *
@@ -17,31 +17,30 @@ public class EvolvedMethod implements Fitness {
     }
 
 
-    // Preprocessing on the multi-dimensional resources transform multiple resources into one scalar
+    // Pre-processing on the multi-dimensional resources transform multiple resources into one scalar
     public double evaluate(
-						DataCenter dataCenter,
-                        double binCPUremain,
-                        double binMEMremain,
-                        double itemCPUrequire,
-                        double itemMEMrequire,
-                        Double optional,
-                        Integer type){
+						DataCenterInterface dataCenter,
+                        double binCpuRemain,
+                        double binMemRemain,
+                        double itemCpuRequire,
+                        double itemMemRequire) {
         double[] normalizedBin;
         double[] normalizedItem;
-        double value = 0;
+        double value;
 
 
         // We use PM to normalize both, therefore, the type is null.
-        normalizedBin = norm.normalize(binCPUremain, binMEMremain, null);
-        normalizedItem = norm.normalize(itemCPUrequire, itemMEMrequire, null);
-		// 
-		double normalizedLeftVMBalance = 0.0;
-		double leftVMCpu = normalizedBin[0] - normalizedItem[0];
-		double leftVMMem = normalizedBin[1] - normalizedItem[1];
-		if(leftVMCpu > leftVMMem)
-			normalizedLeftVMBalance = leftVMCpu / leftVMMem;
-		else
-			normalizedLeftVMBalance = leftVMMem / leftVMCpu;
-value = 
-((((normalizedItem[0] / leftVMMem) + dataCenter.CoMemMode) + (((normalizedItem[1] / leftVMCpu) - leftVMMem) - leftVMMem)) - leftVMMem) + ((dataCenter.CoMemMode + ((leftVMCpu - normalizedLeftVMBalance) - leftVMMem)) + (((normalizedItem[0] / leftVMMem) + dataCenter.CoMemMode) + (((normalizedItem[1] / leftVMCpu) - leftVMMem) - leftVMMem)))
+        normalizedBin = norm.normalize(binCpuRemain, binMemRemain);
+        normalizedItem = norm.normalize(itemCpuRequire, itemMemRequire);
+        //
+        double normalizedLeftVMBalance;
+        double leftVMCpu = normalizedBin[0] - normalizedItem[0];
+        double leftVMMem = normalizedBin[1] - normalizedItem[1];
+        if (leftVMCpu > leftVMMem)
+            normalizedLeftVMBalance = leftVMCpu / leftVMMem;
+        else
+            normalizedLeftVMBalance = leftVMMem / leftVMCpu;
+
+    value =
+(((normalizedItem[0] / leftVMCpu) + (normalizedItem[1] / leftVMMem)) + ((normalizedItem[1] / leftVMMem) + (normalizedItem[1] + (normalizedItem[1] / (leftVMMem + leftVMCpu))))) * ((normalizedItem[1] - leftVMCpu) - leftVMMem)
 ;return value;}}

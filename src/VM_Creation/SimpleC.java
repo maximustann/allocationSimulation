@@ -1,11 +1,12 @@
 package VM_Creation;
-import DataCenterEntity.*;
+
+import DataCenterEntity.Container;
+import DataCenterEntity.DataCenterCombined;
+import DataCenterEntity.DataCenterInterface;
+import DataCenterEntity.VM;
 import OperationInterface.VMCreation;
 
-
-import java.util.*;
-
-public class Simple implements VMCreation {
+public class SimpleC implements VMCreation {
 
     /**
      *

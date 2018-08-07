@@ -1,7 +1,8 @@
 package OperationInterface;
 import DataCenterEntity.Container;
+import DataCenterEntity.DataCenterInterface;
 import DataCenterEntity.VM;
 
 public interface VMCreation {
-    public VM execute(double[] vmCpu, double[] vmMem, Container container, double[] osProb);
+    VM execute(DataCenterInterface dataCenter, Container container);
 }

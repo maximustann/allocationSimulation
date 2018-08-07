@@ -1,11 +1,16 @@
 package OperationInterface;
 
-import DataCenterEntity.DataCenter;
 import DataCenterEntity.DataCenterInterface;
 import DataCenterEntity.Holder;
 
-import java.util.ArrayList;
-
+/**
+ * Allocation interface is used for two purposes including:
+ * 1. vm selection: select VM for containers
+ * 2. vm allocation: select PM for VMs
+ *
+ *
+ *
+ */
 public interface Allocation {
-    public int execute(DataCenterInterface datacenter, Holder item, int flag);
+    int execute(DataCenterInterface dataCenter, Holder item, int flag);
 }

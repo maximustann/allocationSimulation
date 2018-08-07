@@ -1,5 +1,5 @@
 package FitnessFunction;
-import DataCenterEntity.DataCenter;
+import DataCenterEntity.DataCenterInterface;
 import Preprocessing.Normalization;
 
 
@@ -17,23 +17,21 @@ public class DivMethod implements Fitness {
     }
 
 
-    // Preprocessing on the multi-dimensional resources transform multiple resources into one scalar
+    // Pre-processing on the multi-dimensional resources transform multiple resources into one scalar
     public double evaluate(
-                    DataCenter dataCenter,
-                    double binCPUremain,
-                    double binMEMremain,
-                    double itemCPUrequire,
-                    double itemMEMrequire,
-                    Double optional,
-                    Integer type){
+                    DataCenterInterface dataCenter,
+                    double binCpuRemain,
+                    double binMemRemain,
+                    double itemCpuRequire,
+                    double itemMemRequire){
         double[] cpuMem;
-        double div = 0;
+        double div;
 
         // calculate the left resources
-        double cpu = binCPUremain - itemCPUrequire;
-        double mem = binMEMremain - itemMEMrequire;
+        double cpu = binCpuRemain - itemCpuRequire;
+        double mem = binMemRemain - itemMemRequire;
 
-        cpuMem = norm.normalize(cpu, mem, type);
+        cpuMem = norm.normalize(cpu, mem);
 
         // If any of the two resources is used up, return the highest score
         if(cpuMem[0] == 0 || cpuMem[1] == 0)

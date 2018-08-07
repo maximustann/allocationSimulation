@@ -17,7 +17,7 @@ public class ReadConfigures {
      */
     public ArrayList<Double[]> readTestCase(String filePath){
 
-        ArrayList<Double[]> data = new ArrayList<Double[]>();
+        ArrayList<Double[]> data = new ArrayList<>();
         try {
             Reader reader = Files.newBufferedReader(Paths.get(filePath));
             CSVReader csvReader = new CSVReader(reader);
@@ -57,7 +57,6 @@ public class ReadConfigures {
             String filePath = folderPath + "testCase" + (i + testCaseNum[0]) + "/" + item + ".csv";
             // read one test case
             data = readTestCase(filePath);
-
 
             testCase.add(data);
         }

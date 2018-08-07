@@ -1,5 +1,5 @@
 package FitnessFunction;
-import DataCenterEntity.DataCenter;
+import DataCenterEntity.DataCenterInterface;
 import Preprocessing.Normalization;
 
 
@@ -22,21 +22,19 @@ public class MixedMethod implements Fitness {
 
     // Preprocessing on the multi-dimensional resources transform multiple resources into one scalar
     public double evaluate(
-                        DataCenter dataCenter,
-                        double binCPUremain,
-                        double binMEMremain,
-                        double itemCPUrequire,
-                        double itemMEMrequire,
-                        Double optional,
-                        Integer type){
+                        DataCenterInterface dataCenter,
+                        double binCpuRemain,
+                        double binMemRemain,
+                        double itemCpuRequire,
+                        double itemMemRequire){
         double[] cpuMem;
-        double sum  = 0;
-        double sub = 0;
+        double sum;
+        double sub;
         // calculate the left resources
-        double cpu = binCPUremain - itemCPUrequire;
-        double mem = binMEMremain - itemMEMrequire;
+        double cpu = binCpuRemain - itemCpuRequire;
+        double mem = binMemRemain - itemMemRequire;
 
-        cpuMem = norm.normalize(cpu, mem, type);
+        cpuMem = norm.normalize(cpu, mem);
 
 
         // core
@@ -46,7 +44,6 @@ public class MixedMethod implements Fitness {
         else
             sub = cpuMem[1] - cpuMem[0];
 
-        double result = sum * sub;
-        return result;
+        return sum * sub;
     }
 }

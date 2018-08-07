@@ -5,16 +5,16 @@ public class Container implements Holder {
     // id starts from 1
     private int id;
     private int os;
-    private double cpu_used;
-    private double mem_used;
+    private double cpuUsed;
+    private double memUsed;
     private VM allocateTo;
 
 
 
     // initialize container
     public Container(double cpu, double mem, int os, int id) {
-        this.cpu_used = cpu;
-        this.mem_used = mem;
+        this.cpuUsed = cpu;
+        this.memUsed = mem;
         this.os = os;
         this.id = id;
     }
@@ -25,13 +25,13 @@ public class Container implements Holder {
     }
 
     // check
-    public double getCpu_used() {
-        return cpu_used;
+    public double getCpuUsed() {
+        return cpuUsed;
     }
 
     // check
-    public double getMem_used() {
-        return mem_used;
+    public double getMemUsed() {
+        return memUsed;
     }
 
     // check
@@ -65,21 +65,20 @@ public class Container implements Holder {
     }
 
     // check
-    public double getCpu_configuration() {
-        return getCpu_used();
+    public double getCpuConfiguration() {
+        return getCpuUsed();
     }
 
-    // check
-    public double getMem_configuration() {
-        return getMem_used();
+    public double getMemConfiguration() {
+        return getMemUsed();
     }
 
-    public double getCpu_remain(){
-        return getCpu_used();
+    public double getCpuRemain(){
+        return getCpuUsed();
     }
 
-    public double getMem_remain(){
-        return getMem_used();
+    public double getMemRemain(){
+        return getMemUsed();
     }
 
     // This method is only for bin, not for item!!
@@ -88,9 +87,8 @@ public class Container implements Holder {
         return null;
     }
 
-    // check
     public void print(){
-        System.out.print("container ID: " + id + ", CPU: "+ cpu_used + ", Mem: " + mem_used +
+        System.out.print("container ID: " + id + ", CPU: "+ cpuUsed + ", Mem: " + memUsed +
                         ", OS: " + os);
     }
 }
