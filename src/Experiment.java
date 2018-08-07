@@ -1,87 +1,50 @@
 
-import FileHandlers.ReadConfigures;
-import FileHandlers.ReadFile;
+import fileHandlers.ReadConfigures;
+import fileHandlers.ReadFile;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import DataCenterEntity.*;
-import FileHandlers.WriteFile;
-import FitnessFunction.*;
-import OperationInterface.*;
-import PM_Creation.SimplePM;
-import Preprocessing.LinearNormalize;
-import Preprocessing.Normalization;
-import AllocationMethod.*;
-import VM_Creation.*;
+import dataCenterEntity.*;
+import fileHandlers.WriteFile;
+import fitnessFunction.*;
+import operationInterface.*;
+import pmCreation.SimplePM;
+import preprocessing.LinearNormalize;
+import preprocessing.Normalization;
+import allocationMethod.*;
+import vmCreation.*;
+import experimentScenarios.*;
+
 
 public class Experiment {
-    public static void main(String[] args) throws IOException {
-
-        // Test Scenarios
-        final int REALWORLD_SMALL = 0;
-        final int BALANCED_DATA_SMALL = 1;
-        final int BALANCED_VM_SMALL = 2;
-        // Fitness functions
-        final int SUB_METHOD = 0;
-        final int SUM_METHOD = 1;
-        final int MIX_METHOD = 2;
-        final int EVO_METHOD = 3;
-        final int DIV_METHOD = 4;
-
-
-        // vm creation rules
-        final int SIMPLE = 0;
-        final int LARGEST = 1;
-        final int OSPROB = 2;
-
-
-        // vm selection rules
-        final int BESTFIT = 0;
-        final int FIRSTFIT = 1;
-        final int ANYFIT = 2;
-
-        // pm creation rules
-        final int SIMPLEPM = 0;
-
-
-        // test case size
-        final int SMALL = 0;
-        final int MEDIUM = 1;
-        final int LARGE = 2;
-
-        // os choice
-        final int SINGLE = 1;
-        final int TWO = 2;
-        final int THREE = 3;
-        final int FIVE = 5;
-
+    public static void main(String[] args){
         experimentRunner(
-                        REALWORLD_SMALL,
-                        MEDIUM,
-                        TWO,
-                        EVO_METHOD,
-                        SUB_METHOD,
-                        LARGEST,
-                        FIRSTFIT,
-                        BESTFIT,
-                        SIMPLEPM);
+                        TestDataSet.REAL_WORLD_SMALL,
+                        TestCaseSizes.MEDIUM,
+                        OperatingSystems.TWO,
+                        FitnessFunctions.EVO, // vm selection rule
+                        FitnessFunctions.SUB, // pm selection rule
+                        VMCreationRules.LARGEST,
+                        SelectionRules.BESTFIT, // vm selection framework
+                        SelectionRules.FIRSTFIT, // pm selection framework
+                        PMCreationRules.LARGEST);
     }
 
 
 
     public static void experimentRunner(
-                                int testScenario,
-                                int testCaseSizeChoice,
-                                int osChoice,
-                                int selectionFitnessChoice,
-                                int allocationFitnessChoice,
-                                int vmCreationChoice,
-                                int vmAllocationChoice,
-                                int vmSelectionChoice,
-                                int pmCreationChoice
+                                TestDataSet testScenario,
+                                TestCaseSizes testCaseSizeChoice,
+                                OperatingSystems osChoice,
+                                FitnessFunctions vmSelectionFitnessChoice,
+                                FitnessFunctions pmSelectionFitnessChoice,
+                                VMCreationRules vmCreationChoice,
+                                SelectionRules vmSelectionChoice,
+                                SelectionRules pmSelectionChoice,
+                                PMCreationRules pmCreationChoice
                                 ){
 
         // test from case 50 to 100, always, because we used 0 to 49 to train
@@ -108,79 +71,21 @@ public class Experiment {
         String resultBase= "/local/scratch/tanboxi/containerAllocationResults/";
 
 
-        String VMConfig;
-        String PMConfig;
-        switch (testScenario){
-            case 0: // Real world small
-            case 1: // Balanced container (data)
-                VMConfig = "VMConfig/VMConfig_xSmall";
-                PMConfig = "PMConfig/PMConfig_xSmall";
-                break;
-            case 2: // Balanced container and VM
-                VMConfig = "VMConfig/VMConfig_xSmall_balanced";
-                PMConfig = "PMConfig/PMConfig_xSmall_balanced";
-                break;
+        String VMConfig = testScenario.getVmConfig();
+        String PMConfig = testScenario.getPmConfig();
 
-            default:
-                PMConfig = "PMConfig/PMConfig_xSmall";
-                VMConfig = "VMConfig/VMConfig_xSmall";
-        }
         String VMConfigPath = ConfigPath + VMConfig + ".csv";
         String PMConfigPath = ConfigPath + PMConfig + ".csv";
 
 
 
-        String chosenOS = null;
-        switch(osChoice){
-            case 1: chosenOS = "OS1"; break;
-            case 2: chosenOS = "OS2"; break;
-            case 3: chosenOS = "OS3"; break;
-            case 5: chosenOS = "OS5"; break;
-            default: chosenOS = "OS3";
-        }
-
+        String chosenOS = osChoice.getDirectory();
         osProPath += (chosenOS + "/probability.csv");
 
-        String chosenTestCase = null;
-        String testCaseRoot = null;
-        switch(testCaseSizeChoice){
-            case 0:
-                    testCaseRoot = "Container80";
-                    chosenTestCase = testCaseRoot + "/";
-                    testCaseSize[0] = 80;
-                    Arrays.fill(testCaseSize, 0, 50, 80);
-                    break;
-            case 1:
-                testCaseRoot = "Container200";
-                switch (testScenario){
-                    case 0: // realworld smalL
-                         chosenTestCase = testCaseRoot + "_REALWORLD_SMALL/";
-                         break;
-                    case 1: // balanced container (data) small
-                        chosenTestCase = testCaseRoot + "_BALANCED_SMALL/";
-                        break;
-                    case 2: // balanced container and VM small
-                        chosenTestCase = testCaseRoot + "_BALANCED_VM_SMALL/";
-                        break;
+        String testCaseRoot = testCaseSizeChoice.getDirectory();
+        String chosenTestCase = testCaseRoot + testScenario.getDirectory() + "/";
+        Arrays.fill(testCaseSize, 0, 50, testCaseSizeChoice.getTestSize());
 
-                    default:
-                        chosenTestCase = testCaseRoot + "_REALWORLD_SMALL/";
-                }
-                    testCaseSize[0] = 200;
-                    Arrays.fill(testCaseSize, 0, 50, 200);
-                    break;
-            case 2:
-                    testCaseRoot = "Container5000";
-                    chosenTestCase = testCaseRoot + "/";
-                    testCaseSize[0] = 5000;
-                    Arrays.fill(testCaseSize, 0, 50, 5000);
-                    break;
-            default:
-                    testCaseRoot = "Container80";
-                    chosenTestCase = testCaseRoot + "/";
-                    testCaseSize[0] = 80;
-                    Arrays.fill(testCaseSize, 0, 50, 80);
-        }
         testCaseFilesPath += chosenTestCase;
         osPath += (chosenOS + testCaseRoot + "/");
         initEnvPath += (chosenOS + "/" + chosenTestCase);
@@ -191,7 +96,7 @@ public class Experiment {
 
         // Read files from disk
         ReadFile readFiles = new ReadFile(
-                vmTypes, osChoice, testCases,
+                vmTypes, osChoice.getNumOfOs(), testCases,
                 testCaseSize, PMConfigPath, VMConfigPath,
                 testCaseFilesPath, osPath, osProPath);
 
@@ -216,26 +121,26 @@ public class Experiment {
         // Normalization method, pass the vm configuration
         Normalization norm = new LinearNormalize(pmCpu, pmMem);
 
-        // selection fitness Function List
-        Fitness selectionFitnessFunction = null;
-        switch (selectionFitnessChoice){
-            case 0: selectionFitnessFunction = new SubMethod(norm); break;
-            case 1: selectionFitnessFunction = new SumMethod(norm); break;
-            case 2: selectionFitnessFunction = new MixedMethod(norm); break;
-            case 3: selectionFitnessFunction = new EvolvedMethod(norm); break;
-            case 4: selectionFitnessFunction = new DivMethod(norm); break;
-            default: selectionFitnessFunction = new SubMethod(norm);
+        // vm selection fitness Function List
+        Fitness vmSelectionFitnessFunction;
+        switch (vmSelectionFitnessChoice){
+            case SUB: vmSelectionFitnessFunction = new SubMethod(norm); break;
+            case SUM: vmSelectionFitnessFunction = new SumMethod(norm); break;
+            case MIX: vmSelectionFitnessFunction = new MixedMethod(norm); break;
+            case EVO: vmSelectionFitnessFunction = new EvolvedMethod(norm); break;
+            case DIV: vmSelectionFitnessFunction = new DivMethod(norm); break;
+            default: vmSelectionFitnessFunction = new SubMethod(norm);
         }
 
-        // allocation fitness Function List
-        Fitness allocationFitnessFunction = null;
-        switch(allocationFitnessChoice){
-            case 0: allocationFitnessFunction = new SubMethod(norm); break;
-            case 1: allocationFitnessFunction = new SumMethod(norm); break;
-            case 2: allocationFitnessFunction = new MixedMethod(norm); break;
-            case 3: allocationFitnessFunction = new EvolvedMethod(norm); break;
-            case 4: allocationFitnessFunction = new DivMethod(norm);break;
-            default: allocationFitnessFunction = new SubMethod(norm);
+        // pm selection fitness Function List
+        Fitness pmSelectionFitnessFunction;
+        switch(pmSelectionFitnessChoice){
+            case SUB: pmSelectionFitnessFunction = new SubMethod(norm); break;
+            case SUM: pmSelectionFitnessFunction = new SumMethod(norm); break;
+            case MIX: pmSelectionFitnessFunction = new MixedMethod(norm); break;
+            case EVO: pmSelectionFitnessFunction = new EvolvedMethod(norm); break;
+            case DIV: pmSelectionFitnessFunction = new DivMethod(norm);break;
+            default: pmSelectionFitnessFunction = new SubMethod(norm);
         }
 
 
@@ -248,42 +153,62 @@ public class Experiment {
             PMCreation: Create a PM when there is suitable PM exist
          */
 
-        VMCreation vmCreationRule = null;
+        VMCreation vmCreationRule;
         switch (vmCreationChoice){
-            case 0: vmCreationRule = new Simple(); break;
-            case 1: vmCreationRule = new Largest(); break;
-            case 2: vmCreationRule = new OSProportion(); break;
+            case JUSTFIT: vmCreationRule = new Simple(); break;
+            case LARGEST: vmCreationRule = new Largest(); break;
+            case OSPROB: vmCreationRule = new OSProportion(); break;
             default: vmCreationRule =  new Simple();
         }
 
-        Allocation vmAllocationRule = null;
-        switch (vmAllocationChoice){
-            case 0:
+        Allocation pmSelectionRule;
+        switch (pmSelectionChoice){
+            case BESTFIT:
                 // both sub rule and sum rule require the residual or balance to be minimized
-                if(allocationFitnessChoice == 1 || allocationFitnessChoice == 0 || allocationFitnessChoice == 2)
-                    vmAllocationRule = new BestFit_Sub(allocationFitnessFunction);
-                else vmAllocationRule = new BestFit(allocationFitnessFunction);
-                break;
-            case 1: vmAllocationRule = new FirstFit(); break;
-            default: vmAllocationRule = new FirstFit();
+                switch (pmSelectionFitnessChoice){
+                    case SUB:
+                    case SUM:
+                    case MIX:
+                        pmSelectionRule = new BestFit_Sub(pmSelectionFitnessFunction);
+                        break;
+                    case EVO:
+                    case DIV:
+                        pmSelectionRule = new BestFit(pmSelectionFitnessFunction);
+                        break;
+                    default:
+                        pmSelectionRule = new BestFit_Sub(pmSelectionFitnessFunction);
+                }
+            case FIRSTFIT: pmSelectionRule = new FirstFit(); break;
+            default: pmSelectionRule = new FirstFit();
         }
 
-        Allocation vmSelectionRule = null;
+        Allocation vmSelectionRule;
         switch (vmSelectionChoice){
-            case 0:
+            case BESTFIT:
                 // both sub rule and sum rule require the residual or balance to be minimized
-                if(selectionFitnessChoice == 1 || selectionFitnessChoice == 0 || selectionFitnessChoice == 2)
-                    vmSelectionRule = new BestFit_Sub(selectionFitnessFunction);
-                else vmSelectionRule = new BestFit(selectionFitnessFunction);
+                switch (pmSelectionFitnessChoice){
+                    case SUB:
+                    case SUM:
+                    case MIX:
+                        vmSelectionRule = new BestFit_Sub(vmSelectionFitnessFunction);
+                        break;
+                    case EVO:
+                    case DIV:
+                        vmSelectionRule = new BestFit(vmSelectionFitnessFunction);
+                        break;
+                    default:
+                        vmSelectionRule = new BestFit_Sub(vmSelectionFitnessFunction);
+                }
                 break;
-            case 1: vmSelectionRule = new FirstFit(); break;
-            case 2: vmSelectionRule = new AnyFit(); break;
+            case FIRSTFIT: vmSelectionRule = new FirstFit(); break;
+            case ANYFIT: vmSelectionRule = new AnyFit(); break;
             default: vmSelectionRule = new FirstFit();
         }
 
-        PMCreation pmCreationRule = null;
+        PMCreation pmCreationRule;
         switch (pmCreationChoice){
-            case 0: pmCreationRule = new SimplePM();
+            case LARGEST: pmCreationRule = new SimplePM();
+            default: pmCreationRule = new SimplePM();
         }
 
         // accumulated energy arrayList for each test case
@@ -309,7 +234,7 @@ public class Experiment {
             // For each test case, we create a new empty data center
             DataCenter myDataCenter = new DataCenter(
                     pmEnergy, k, pmCpu, pmMem, vmCpu, vmMem, osProb,
-                    vmAllocationRule, vmSelectionRule, vmCreationRule, pmCreationRule);
+                    pmSelectionRule, vmSelectionRule, vmCreationRule, pmCreationRule);
 
 //            Initialize the data center
             ArrayList<Double[]> pmList = initPM.get(testCase);
@@ -343,11 +268,11 @@ public class Experiment {
 
             System.out.println("Current Energy: " + myDataCenter.calEnergy());
             System.out.println("Accumulated Energy: " + myDataCenter.getAccumulatedEnergyConsumption());
-//             Round to two decimal point
+//          Round to two decimal point
             accumulatedEnergyList.add(Math.round(myDataCenter.getAccumulatedEnergyConsumption() * 100) / 100.0);
-//            for each test case calculate the average acc energy
+//          for each test case calculate the average acc energy
             averageAccEnergyList.add(Math.round(myDataCenter.getAccumulatedEnergyConsumption() * 100) / 100.0 / 200);
-//             Destroy this data Center, save status data
+//          Destroy this data Center, save status data
             myDataCenter.selfDestruction(resultPath);
         }
 
@@ -357,19 +282,15 @@ public class Experiment {
         } catch (IOException e1){
             e1.printStackTrace();
         }
-//
         double sumAccForAll = 0;
         for(Double testCase:averageAccEnergyList){
             sumAccForAll += testCase;
         }
-//
         System.out.println("Average Incremental Energy for all test cases: " + sumAccForAll / 50);
         System.out.println("Done!");
 
 
     }
-
-
 
 
 }
