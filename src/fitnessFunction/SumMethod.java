@@ -12,7 +12,7 @@ import preprocessing.Normalization;
  * That is, the less resources left after allocation, the better the choice
  *
  */
-public class SumMethod implements Fitness {
+public class SumMethod implements SelectionFitness {
     private Normalization norm;
 
     public SumMethod(Normalization norm){

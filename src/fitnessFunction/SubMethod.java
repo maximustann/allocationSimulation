@@ -9,7 +9,7 @@ import preprocessing.Normalization;
  * That is, the more balance between two resources after allocation, the better the choice.
  *
  */
-public class SubMethod implements Fitness {
+public class SubMethod implements SelectionFitness {
     private Normalization norm;
 
     public SubMethod(Normalization norm){

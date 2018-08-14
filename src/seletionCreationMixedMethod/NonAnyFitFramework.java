@@ -2,6 +2,8 @@ package seletionCreationMixedMethod;
 
 import dataCenterEntity.*;
 import fitnessFunction.Fitness;
+import fitnessFunction.SelectionCreationFitness;
+import fitnessFunction.SelectionFitness;
 import operationInterface.VMSelectionCreation;
 
 import java.util.ArrayList;
@@ -15,16 +17,10 @@ import java.util.ArrayList;
  */
 public class NonAnyFitFramework implements VMSelectionCreation {
 
-    public static final int VMSELECTION = 0;
-    public static final int VMALLOCATION = 1;
-
-
-    private Fitness fitnessFunction;
-
-
+    private SelectionCreationFitness fitnessFunction;
 
     public NonAnyFitFramework(Fitness fitnessFunction){
-        this.fitnessFunction = fitnessFunction;
+        this.fitnessFunction = (SelectionCreationFitness) fitnessFunction;
     }
 
 
@@ -45,64 +41,97 @@ public class NonAnyFitFramework implements VMSelectionCreation {
 
         // create another vmList in case of contamination
         ArrayList<VM> newVMList = (ArrayList<VM>) dataCenter.getVmList().clone();
+//        System.out.println(dataCenter.getVmList().size());
 
-        //
         double[] vmCpu = dataCenter.getVmCpu();
         double[] vmMem = dataCenter.getVmMem();
         double[] osProb = dataCenter.getOsProb();
+
+        //current number of VMs in the data center
+        int currentVmNum = dataCenter.getVmList().size();
 
         // save the current vm counter
         VM.saveCounter();
 
         // store the fitness values
-        Double[] fitnessValue = new Double[newVMList.size() + vmCpu.length];
+//        Double[] fitnessValue = new Double[newVMList.size() + vmCpu.length];
+//        Double fitnessValue;
 
-        // temp fitness
-        Double tempFitness = null;
+        // Best fitness
+        Double bestFitness = null;
 
         // temp VM
-        VM tempVM = null;
+        VM bestVM = null;
+
+        //vm Counter
+        int vmCount = 0;
+
+
+        // new vm flag
+        boolean newVmFlag = false;
 
         // temporarily create five VMs, do not forget to eliminate them if we did not create one
         for(int i = 0; i < vmCpu.length; i++){
-            newVMList.add(new VM(vmCpu[i], vmMem[i], i));
+            VM vm = new VM(vmCpu[i], vmMem[i], i);
+            vm.setOs(container.getExtraInfo());
+            newVMList.add(vm);
         }
 
-        for(int i = 0; i < newVMList.size(); ++i){
-            // evaluate the VMs
-            fitnessValue[i] = fitnessFunction(dataCenter, newVMList.get(i), container);
-            // First VM
-            if(tempFitness == null && fitnessValue[i] != null){
-                tempFitness = fitnessValue[i];
-                tempVM = newVMList.get(i);
 
-                // Does not satisfy the requirement
-            } else if(fitnessValue[i] == null){
+
+        for(VM vm:newVMList){
+            //Check if the vm exists
+            newVmFlag = vmCount >= currentVmNum;
+
+            int vmType = vm.getType();
+
+
+            // evaluate the VMs
+//            fitnessValue[i] = fitnessFunction(dataCenter, newVMList.get(i), container, creationFlag, vmType);
+//            System.out.println("i = " + i);
+            Double fitnessValue = fitnessFunction(dataCenter, vm, container, newVmFlag, vmType);
+//            System.out.println("fitnessValue[" + i + "] = " + fitnessValue);
+            // skip the infeasible solution
+            if(fitnessValue == null) {
+                vmCount += 1;
                 continue;
-            } else if(tempFitness > fitnessValue[i]){
-                tempFitness = fitnessValue[i];
-                tempVM = newVMList.get(i);
             }
+            // First VM
+            if(bestVM == null || fitnessValue > bestFitness){
+                bestFitness = fitnessValue;
+                bestVM = vm;
+                // Does not satisfy the requirement
+            }
+//            else if(fitnessValue[i] != null && creationFlag  > fitnessValue[i]){
+//                // Bigger the better
+//                creationFlag = fitnessValue[i];
+//                bestVM = newVMList.get(i);
+//            }
+            vmCount += 1;
         }
 
         // restore the VM global counter
         VM.restoreCounter();
 
-//        System.out.println("eventually selected " + choosedHolderID);
-        return tempVM;
+        return bestVM;
     }
 
-    private Double fitnessFunction(DataCenterInterface dataCenter, Holder bin, Holder item){
-        Double fitnessValue = 0.0;
+    private Double fitnessFunction(DataCenterInterface dataCenter, Holder bin, Holder item, boolean creationFlag, int vmType){
+        Double fitnessValue;
 
         if (bin.getCpuRemain() <= item.getCpuUsed() ||
                 bin.getMemRemain() <= item.getMemUsed() ||
                 bin.getExtraInfo() != item.getExtraInfo()
                 ) {
+//            System.out.println("bin.getCpuRemain() = " + bin.getCpuRemain() + " vs " + item.getCpuUsed());
+//            System.out.println("bin.getMemRemain() = " + bin.getMemRemain() + " vs " + item.getMemUsed());
+//            System.out.println("vmOS = " + bin.getExtraInfo() + " vs " + item.getExtraInfo());
                 return null;
         } else {
             fitnessValue = fitnessFunction.evaluate(
                     dataCenter,
+                    creationFlag,
+                    vmType,
                     bin.getCpuRemain(),
                     bin.getMemRemain(),
                     item.getCpuUsed(),

@@ -270,6 +270,14 @@ public class DataCenter implements DataCenterInterface{
         return vmMem;
     }
 
+    public double getVmCpuOverhead(int vmType) {
+        return VM.CPU_OVERHEAD_RATE * vmCpu[vmType];
+    }
+
+    public double getVmMemOverhead(){
+        return VM.MEM_OVERHEAD;
+    }
+
     private void updateMode(Container container){
         Double containerCPU = container.getCpuConfiguration();
         Double containerMem = container.getMemConfiguration();

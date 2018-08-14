@@ -57,14 +57,13 @@ public class Experiment {
         // we always have 5 types of Virtual Machines (VMs)
         int vmTypes = 5;
 
+        // We set the idle Physical machine (PM) account for 70% energy consumption compared with a full PM.
+        double k = 0.7;
+
         // These are the addresses of test cases
         String base = "/home/tanboxi/IdeaProjects/MaxTan/data/";
         String ConfigPath = base + "/baseConfig/";
         String testCaseFilesPath = base + "/containerData/";
-
-
-
-
         String initEnvPath = base + "/InitEnv/";
         String osProPath = base + "/OSPro/";
         String osPath = base + "/OSData/";
@@ -114,15 +113,13 @@ public class Experiment {
         double[] vmCpu = readFiles.getVMCpu();
         double[] osProb = readFiles.getOsProb();
 
-        // We set the idle Physical machine (PM) account for 70% energy consumption compared with a full PM.
-        double k = 0.7;
 
 
         // Normalization method, pass the vm configuration
         Normalization norm = new LinearNormalize(pmCpu, pmMem);
 
         // vm selection fitness Function List
-        Fitness vmSelectionFitnessFunction;
+        SelectionFitness vmSelectionFitnessFunction;
         switch (vmSelectionFitnessChoice){
             case SUB: vmSelectionFitnessFunction = new SubMethod(norm); break;
             case SUM: vmSelectionFitnessFunction = new SumMethod(norm); break;
@@ -133,7 +130,7 @@ public class Experiment {
         }
 
         // pm selection fitness Function List
-        Fitness pmSelectionFitnessFunction;
+        SelectionFitness pmSelectionFitnessFunction;
         switch(pmSelectionFitnessChoice){
             case SUB: pmSelectionFitnessFunction = new SubMethod(norm); break;
             case SUM: pmSelectionFitnessFunction = new SumMethod(norm); break;

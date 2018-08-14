@@ -2,7 +2,7 @@ package allocationMethod;
 import java.util.*;
 
 import dataCenterEntity.*;
-import fitnessFunction.Fitness;
+import fitnessFunction.SelectionFitness;
 import operationInterface.*;
 
 
@@ -64,11 +64,11 @@ public class BestFit implements Allocation {
     public static final int VMALLOCATION = 1;
 
 
-    private Fitness fitnessFunction;
+    private SelectionFitness fitnessFunction;
 
 
 
-    public BestFit(Fitness fitnessFunction){
+    public BestFit(SelectionFitness fitnessFunction){
         this.fitnessFunction = fitnessFunction;
     }
 

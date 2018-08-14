@@ -42,6 +42,9 @@ public class DataCenterCombined implements DataCenterInterface{
     private HashMap pmIDtoListIndex;
 
 
+//    private double normalizedVmCpuOverhead;
+//    private double normalizedVmMemOverhead;
+
     // Monitor update the latest information of the data center
     public Monitor monitor;
 
@@ -86,6 +89,30 @@ public class DataCenterCombined implements DataCenterInterface{
         return accumulatedEnergyConsumption;
     }
 
+    public double getPmCpu() {
+        return pmCpu;
+    }
+
+    public double getPmMem(){
+        return pmMem;
+    }
+
+    public double getVmCpuOverhead(int vmType){
+        return VM.CPU_OVERHEAD_RATE * vmCpu[vmType];
+    }
+
+    public  double getVmMemOverhead(int vmType){
+        return VM.MEM_OVERHEAD;
+    }
+
+    //    public double getNormalizedVmCpuOverhead() {
+//        return normalizedVmCpuOverhead;
+//    }
+//
+//    public double getNormalizedVmMemOverhead(){
+//        return normalizedVmMemOverhead;
+//    }
+
     public double[] getVmCpu(){
         return vmCpu;
     }
@@ -105,6 +132,9 @@ public class DataCenterCombined implements DataCenterInterface{
         return vmList;
     }
 
+    public double getVmMemOverhead() {
+        return VM.MEM_OVERHEAD;
+    }
 
     // Initialize Data center
     public void initialization(
@@ -119,11 +149,7 @@ public class DataCenterCombined implements DataCenterInterface{
 
         int globalVMCounter = 0;
         // for each PM
-        for(int i = 0; i < initPmList.size(); ++i){
-
-
-            // Get the VMs of this PM
-            Double[] vms = initPmList.get(i);
+        for(Double[] vms:initPmList){
 
             // Create a new PM
             PM pm = new PM(pmCpu, pmMem, k, maxEnergy);
@@ -136,7 +162,7 @@ public class DataCenterCombined implements DataCenterInterface{
 
                 // Create this VM
                 VM vm = new VM(vmCpu[vmType], vmMem[vmType], vmType);
-                Double[] os = osList.get(vm.getID() - 1);
+                Double[] os = osList.get(vmCounter + globalVMCounter);
                 vm.setOs(os[0].intValue());
 
                 // get the containers allocated on this VM
@@ -176,13 +202,23 @@ public class DataCenterCombined implements DataCenterInterface{
 
         } // End of each PM
 
-        //calculate Energy consumption, not acculated...
         updateAccumulatedEnergy();
 
         // save the current energy consumption
         monitor.addEnergy(calEnergy());
 
     }
+
+//    public void updateNormalizedOverhead(boolean updateFlag, int vmType){
+//        if(updateFlag){
+//            normalizedVmCpuOverhead = vmCpu[vmType] * VM.CPU_OVERHEAD_RATE / pmCpu;
+//            normalizedVmMemOverhead = VM.MEM_OVERHEAD / pmMem;
+//
+//        } else {
+//            normalizedVmCpuOverhead = 0;
+//            normalizedVmMemOverhead = 0;
+//        }
+//    }
 
     public double getK() {
         return k;
@@ -213,8 +249,7 @@ public class DataCenterCombined implements DataCenterInterface{
             chosenVM.setID(newID);
 
 
-            // add the container to the VM
-            chosenVM.addContainer(container);
+
 
             int currentVmNum = vmList.size();
             vmList.add(chosenVM);
@@ -223,16 +258,15 @@ public class DataCenterCombined implements DataCenterInterface{
             vmIDtoListIndex.put(chosenVM.getID(), currentVmNum);
 
 
-            // After we created the vm, we will need to allocate it to a PM, and if there is no suitable PM,
-            // We must create a new PM to accommodate and add the PM to pmList
+            // We must first select or create a new PM to accommodate this VM before we allocating the container,
+            // and we need to add the new PM to the pmList
             int chosenPmID = vmAllocation.execute(this, chosenVM, VMALLOCATION);
+            // ID starts from 1, so 0 means no existing PM is suitable. So we will need to create one PM
             if(chosenPmID == 0){
                 PM pm = pmCreation.execute(pmCpu, pmMem, k, maxEnergy);
                 int currentPmNum = pmList.size();
                 pm.addVM(chosenVM);
                 pmList.add(pm);
-
-
                 // We map PM ID and its index in the pmList
                 pmIDtoListIndex.put(pm.getID(), currentPmNum);
 
@@ -244,9 +278,10 @@ public class DataCenterCombined implements DataCenterInterface{
                 // Finally, we add the VM to the PM.
                 PM chosenPM = pmList.get((int) pmIDtoListIndex.get(chosenPmID));
                 chosenPM.addVM(chosenVM);
-
             }
-            // If there is a suitable VM, then allocate to this VM
+
+            // add the container to the VM
+            chosenVM.addContainer(container);
         }
 
         // After allocating a container, update the accumulated energy consumption of the current data center

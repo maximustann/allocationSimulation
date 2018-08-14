@@ -12,7 +12,7 @@ import preprocessing.Normalization;
  * That is, the less resources left after allocation, the better the choice
  *
  */
-public class MixedMethod implements Fitness {
+public class MixedMethod implements SelectionFitness {
     private Normalization norm;
 
     public MixedMethod(Normalization norm){

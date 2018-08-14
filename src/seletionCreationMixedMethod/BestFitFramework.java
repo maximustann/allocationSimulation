@@ -2,6 +2,7 @@ package seletionCreationMixedMethod;
 
 import dataCenterEntity.*;
 import fitnessFunction.Fitness;
+import fitnessFunction.SelectionFitness;
 import operationInterface.VMCreation;
 import operationInterface.VMSelectionCreation;
 
@@ -12,11 +13,11 @@ import java.util.ArrayList;
  */
 public class BestFitFramework implements VMSelectionCreation {
 
-    private Fitness selectionFitness;
+    private SelectionFitness selectionFitness;
     private VMCreation vmCreation;
     public BestFitFramework(Fitness selectionFitness, VMCreation vmCreation) {
 
-        this.selectionFitness = selectionFitness;
+        this.selectionFitness = (SelectionFitness) selectionFitness;
         this.vmCreation = vmCreation;
 
     }

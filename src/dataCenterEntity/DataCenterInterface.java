@@ -8,4 +8,8 @@ public interface DataCenterInterface {
     double[] getVmCpu();
     double[] getVmMem();
     double[] getOsProb();
+    double getPmCpu();
+    double getPmMem();
+    double getVmCpuOverhead(int vmType);
+    double getVmMemOverhead();
 }

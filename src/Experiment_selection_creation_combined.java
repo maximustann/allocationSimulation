@@ -4,6 +4,7 @@ import allocationMethod.FirstFit;
 import dataCenterEntity.Container;
 import dataCenterEntity.DataCenterCombined;
 import fileHandlers.ReadConfigures;
+import fileHandlers.ReadExpression;
 import fileHandlers.ReadFile;
 import fileHandlers.WriteFile;
 import fitnessFunction.*;
@@ -28,13 +29,14 @@ public class Experiment_selection_creation_combined {
     public static void main(String[] args){
 
         experimentRunner(
+                new Integer(args[0]),
                 TestDataSet.REAL_WORLD_SMALL,
                 TestCaseSizes.MEDIUM,
                 OperatingSystems.TWO,
                 FitnessFunctions.EVO, // vm selection rule
                 FitnessFunctions.SUB, // pm selection rule
-                VMCreationRules.LARGEST,
-                VMAllocationFramework.ANYFIT, // vm selection-creation framework
+                VMCreationRules.OSPROB,
+                VMAllocationFramework.NONANYFIT, // vm selection-creation framework
                 SelectionRules.FIRSTFIT, // pm selection framework
                 PMCreationRules.LARGEST);
     }
@@ -42,6 +44,7 @@ public class Experiment_selection_creation_combined {
 
 
     public static void experimentRunner(
+            Integer run,
             TestDataSet testScenario,
             TestCaseSizes testCaseSizeChoice,
             OperatingSystems osChoice,
@@ -54,17 +57,22 @@ public class Experiment_selection_creation_combined {
                                 ){
 
         // test from case 50 to 100, always, because we have used 0 to 49 to train
-        int[] testCases = {50, 100};
+        int[] testCases = {TestCaseRange.START.getNum(), TestCaseRange.END.getNum()};
 
         // Each test case may have a different size (number of containers to be allocated)
-        int[] testCaseSize = new int[50];
+        int[] testCaseSize = new int[TestCaseRange.END.getNum() - TestCaseRange.START.getNum()];
+
+        // Expression List
+        ArrayList<String> expressions = new ArrayList<>();
 
 
         // we always have 5 types of Virtual Machines (VMs)
         int vmTypes = 5;
 
+        // We test dataset on 30 Runs
+        int experimentRepeat = 30;
+
         // These are the addresses of test cases
-//        String base = "/Users/maximustann/Work/allocationSimulation/BilevelData/dataset";
         String base = "/home/tanboxi/IdeaProjects/MaxTan/data/";
         String ConfigPath = base + "/baseConfig/";
         String testCaseFilesPath = base + "/containerData/";
@@ -72,6 +80,7 @@ public class Experiment_selection_creation_combined {
         String osProPath = base + "/OSPro/";
         String osPath = base + "/OSData/";
         String resultBase= "/local/scratch/tanboxi/containerAllocationResults/";
+        String evolvedMethodPath = "/local/scratch/tanboxi/VMCreationGP/Container200";
 
 
         String VMConfig = testScenario.getVmConfig();
@@ -85,9 +94,13 @@ public class Experiment_selection_creation_combined {
         osProPath += (chosenOS + "/probability.csv");
 
 
+        evolvedMethodPath += testScenario.getResultDirectory() + "/bestGPTree_";
         String testCaseRoot = testCaseSizeChoice.getDirectory();
         String chosenTestCase = testCaseRoot + testScenario.getDirectory() + "/";
-        Arrays.fill(testCaseSize, 0, 50, testCaseSizeChoice.getTestSize());
+        Arrays.fill(testCaseSize, 0,
+                TestCaseRange.END.getNum() - TestCaseRange.START.getNum(),
+                testCaseSizeChoice.getTestSize()
+                    );
 
         testCaseFilesPath += chosenTestCase;
         osPath += (chosenOS + testCaseRoot + "/");
@@ -95,6 +108,9 @@ public class Experiment_selection_creation_combined {
 
         // WriteFile instance
         WriteFile writer = new WriteFile();
+
+        // Expression Reader
+        ReadExpression expReader = new ReadExpression(evolvedMethodPath);
 
         // Read files from disk
         ReadFile readFiles = new ReadFile(
@@ -126,17 +142,34 @@ public class Experiment_selection_creation_combined {
 
         // vm selection fitness Function List
         Fitness vmSelectionFitnessFunction;
-        switch (vmSelectionFitnessChoice){
-            case SUB: vmSelectionFitnessFunction = new SubMethod(norm); break;
-            case SUM: vmSelectionFitnessFunction = new SumMethod(norm); break;
-            case MIX: vmSelectionFitnessFunction = new MixedMethod(norm); break;
-            case EVO: vmSelectionFitnessFunction = new EvolvedMethod(norm); break;
-            case DIV: vmSelectionFitnessFunction = new DivMethod(norm); break;
-            default: vmSelectionFitnessFunction = new SubMethod(norm);
+        switch (vmAllocationFrameworkChoice){
+            case ANYFIT:
+                switch (vmSelectionFitnessChoice){
+                    case SUB: vmSelectionFitnessFunction = new SubMethod(norm); break;
+                    case SUM: vmSelectionFitnessFunction = new SumMethod(norm); break;
+                    case MIX: vmSelectionFitnessFunction = new MixedMethod(norm); break;
+                    case EVO: vmSelectionFitnessFunction = new EvolvedMethod(norm); break;
+                    case DIV: vmSelectionFitnessFunction = new DivMethod(norm); break;
+                    default: vmSelectionFitnessFunction = new SubMethod(norm);
+                }
+                break;
+            case NONANYFIT:
+                String expression = expReader.readExpFrom(run);
+//                String expression = "normalizedItemCpu / ((leftVmMem + (normalizedVmCpuOverhead / normalizedItemCpu)) + " +
+//                        "(((normalizedVmCpuOverhead / leftVmCpu) + ((normalizedVmCpuOverhead / normalizedItemCpu) + " +
+//                        "(normalizedVmCpuOverhead / normalizedItemCpu))) / (normalizedItemMem * ((normalizedVmCpuOverhead / normalizedItemCpu) + " +
+//                        "(leftVmMem + normalizedVmCpuOverhead)))))";
+                vmSelectionFitnessFunction = new NonAnyFitEvolvedMethod(norm, expression);
+                break;
+            default:
+                expression = expReader.readExpFrom(run);
+                vmSelectionFitnessFunction = new NonAnyFitEvolvedMethod(norm, expression);
         }
 
+
+
         // pm selection fitness Function List
-        Fitness pmSelectionFitnessFunction;
+        SelectionFitness pmSelectionFitnessFunction;
         switch(pmSelectionFitnessChoice){
             case SUB: pmSelectionFitnessFunction = new SubMethod(norm); break;
             case SUM: pmSelectionFitnessFunction = new SumMethod(norm); break;
@@ -193,7 +226,7 @@ public class Experiment_selection_creation_combined {
                 selectionCreationFramework = new BestFitFramework(vmSelectionFitnessFunction, vmCreationRule);
                 break;
             case NONANYFIT:
-                selectionCreationFramework = new NonAnyFitFramework(new EvolvedMethod(norm));
+                selectionCreationFramework = new NonAnyFitFramework(vmSelectionFitnessFunction);
                 break;
             default:
                 selectionCreationFramework = new BestFitFramework(vmSelectionFitnessFunction, vmCreationRule);
@@ -213,13 +246,16 @@ public class Experiment_selection_creation_combined {
 
         // Experiment starts here,
         // We run the test case from N to M
-        for(int testCase = 0; testCase + testCases[0] < testCases[1]; ++testCase){
+        for(int testCaseCount = 0;
+            testCaseCount + TestCaseRange.START.getNum() < TestCaseRange.END.getNum();
+            ++testCaseCount){
+
             System.out.println("==================================================");
-            System.out.println("testCase: " + (testCase + 1));
+            System.out.println("testCase: " + (testCaseCount + 1));
 
 //            String resultPath = resultBase;
             // Create result folder
-            String resultPath = resultBase + testCase + "/";
+            String resultPath = resultBase + testCaseCount + "/";
             File rB = new File(resultPath);
             if(!rB.exists()){
                 rB.mkdir();
@@ -231,24 +267,26 @@ public class Experiment_selection_creation_combined {
                     pmSelectionRule, selectionCreationFramework, pmCreationRule);
 
 //            Initialize the data center
-            ArrayList<Double[]> pmList = initPM.get(testCase);
-            ArrayList<Double[]> vmList = initVM.get(testCase);
-            ArrayList<Double[]> containerList = initContainer.get(testCase);
-            ArrayList<Double[]> osList = initOS.get(testCase);
+            ArrayList<Double[]> pmList = initPM.get(testCaseCount);
+            ArrayList<Double[]> vmList = initVM.get(testCaseCount);
+            ArrayList<Double[]> containerList = initContainer.get(testCaseCount);
+            ArrayList<Double[]> osList = initOS.get(testCaseCount);
 
             myDataCenter.initialization(pmList, vmList, containerList, osList);
-            myDataCenter.print();
+            Double energy = myDataCenter.calEnergy();
+
+//            myDataCenter.print();
 //            System.out.println("After initialization = " + myDataCenter.calEnergy());
 
             // We have already read all the files at the beginning.
             // Now we just retrieve all the information from readFiles object
-            double[] taskCpu = readFiles.getTaskCpu(testCase);
-            double[] taskMem = readFiles.getTaskMem(testCase);
-            int[] taskOS = readFiles.getTaskOS(testCase);
+            double[] taskCpu = readFiles.getTaskCpu(testCaseCount);
+            double[] taskMem = readFiles.getTaskMem(testCaseCount);
+            int[] taskOS = readFiles.getTaskOS(testCaseCount);
 
             // For each testCase, we need to send container one by one
             // After each container allocation, the data center prints its energy consumption
-            for(int i = 0; i < testCaseSize[testCase]; ++i) {
+            for(int i = 0; i < testCaseSize[testCaseCount]; ++i) {
 //                System.out.println();
 //                System.out.println("task = " + i + ", CPU = " + taskCpu[i] + ", MEM = " + taskMem[i] + ", OS = " + taskOS[i]);
 //                 ID starts from 1
@@ -263,11 +301,13 @@ public class Experiment_selection_creation_combined {
 //
             System.out.println("Current Energy: " + myDataCenter.calEnergy());
             System.out.println("Accumulated Energy: " + myDataCenter.getAccumulatedEnergyConsumption());
+            System.out.println("Average Accumulated Energy: " + myDataCenter.getAccumulatedEnergyConsumption() / 200.0);
 //             Round to two decimal point
             accumulatedEnergyList.add(Math.round(myDataCenter.getAccumulatedEnergyConsumption() * 100) / 100.0);
 //
 //            for each test case calculate the average acc energy
-            averageAccEnergyList.add(Math.round(myDataCenter.getAccumulatedEnergyConsumption() * 100) / 100.0 / 200);
+            averageAccEnergyList.add(Math.round(myDataCenter.getAccumulatedEnergyConsumption() * 100) / 100.0
+                                                / TestCaseSizes.MEDIUM.getTestSize());
 //             Destroy this data Center, save status data
             myDataCenter.selfDestruction(resultPath);
         } // End test Case
@@ -284,7 +324,9 @@ public class Experiment_selection_creation_combined {
             sumAccForAll += testCase;
         }
 //
-        System.out.println("Average Incremental Energy for all test cases: " + sumAccForAll / 50);
+        System.out.println("Average Incremental Energy for all test cases: "
+                + sumAccForAll
+                / (TestCaseRange.END.getNum() - TestCaseRange.START.getNum()));
         System.out.println("Done!");
 
 
