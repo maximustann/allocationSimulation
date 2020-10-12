@@ -1,11 +1,10 @@
 package experimentScenarios;
 
 public enum TestCaseRange {
-    START(50),
-    END(100);
+    START(100),
+    END(130);
 //    START(0),
 //    END(50);
-
     private int num;
 
     TestCaseRange(int num){

@@ -10,6 +10,8 @@ public interface DataCenterInterface {
     double[] getOsProb();
     double getPmCpu();
     double getPmMem();
+    double getK();
+    double getMaxEnergy();
     double getVmCpuOverhead(int vmType);
     double getVmMemOverhead();
 }

@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/allocationSimulation.iml" filepath="$PROJECT_DIR$/allocationSimulation.iml" />
+      <module fileurl="file://$PROJECT_DIR$/containerAllocation.iml" filepath="$PROJECT_DIR$/containerAllocation.iml" />
     </modules>
   </component>
 </project>

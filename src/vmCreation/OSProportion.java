@@ -95,12 +95,7 @@ public class OSProportion implements VMCreation {
 
         } // end else
 
-        // Debug
-//        if(vm == null){
-//            for(PM pm:pmList){
-//                pm.print();
-//            }
-//        }
+
         // return the vm
         return vm;
     }

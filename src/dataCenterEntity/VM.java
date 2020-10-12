@@ -27,7 +27,7 @@ public class VM implements Holder {
      * memRemain = mem_configuration - mem_used
      * cpuUtilization is the cpu utilization of the current VM
      * memUtilization is the mem utilization of the current VM
-     * type is the type of VM, start from 0
+     * type is the type of VM, starts from 0
      * os is the configured OS of VM, and the OS is initialized as 0 (No OS).
      * allocateTo is the PM that this VM allocated to.
      * containerList contains all the containers that allocated to this VM.
@@ -75,19 +75,15 @@ public class VM implements Holder {
         id = vmCounter;
     }
 
-    /**
-     * calculate the current cpu utilization.
-     */
-    private void updateCpuUtilization(){
-        cpuUtilization = cpuUsed / cpuConfiguration;
+    public double getMemOverhead(){
+        return MEM_OVERHEAD;
     }
 
-    /**
-     * calculate the current mem utilization.
-     */
-    private void updateMemUtilization(){
-        memUtilization = memUsed / memConfiguration;
+    public double getCpuOverheadRate(){
+        return CPU_OVERHEAD_RATE;
     }
+
+
 
     public double getCpuConfiguration() {
         return cpuConfiguration;
@@ -122,38 +118,6 @@ public class VM implements Holder {
     }
 
 
-    /**
-     * @param container
-     * calculate the remained cpu as well as update the cpu utilization
-     */
-    private void addCpu(Container container){
-        cpuRemain -= container.getCpuUsed();
-        cpuUsed += container.getCpuUsed();
-        updateCpuUtilization();
-    }
-
-    private void removeCpu(Container container){
-        cpuRemain += container.getCpuUsed();
-        cpuUsed -= container.getCpuUsed();
-        updateCpuUtilization();
-    }
-
-
-    /**
-     * @param container
-     * calculate the remained mem as well as update the mem utilization
-     */
-    private void addMem(Container container){
-        memRemain -= container.getMemUsed();
-        memUsed += container.getMemUsed();
-        updateMemUtilization();
-    }
-
-    private void removeMem(Container container){
-        memRemain += container.getMemUsed();
-        memUsed -= container.getMemUsed();
-        updateMemUtilization();
-    }
 
     // This method is called by the host PM
     public void setAllocateTo(PM pm){
@@ -345,5 +309,58 @@ public class VM implements Holder {
 
     public static void restoreCounter(){
         vmCounter = savePointVmCounter;
+    }
+
+
+
+
+
+
+
+    /**
+     * calculate the current cpu utilization.
+     */
+    private void updateCpuUtilization(){
+        cpuUtilization = cpuUsed / cpuConfiguration;
+    }
+
+    /**
+     * calculate the current mem utilization.
+     */
+    private void updateMemUtilization(){
+        memUtilization = memUsed / memConfiguration;
+    }
+
+    /**
+     * @param container
+     * calculate the remained cpu as well as update the cpu utilization
+     */
+    private void addCpu(Container container){
+        cpuRemain -= container.getCpuUsed();
+        cpuUsed += container.getCpuUsed();
+        updateCpuUtilization();
+    }
+
+    private void removeCpu(Container container){
+        cpuRemain += container.getCpuUsed();
+        cpuUsed -= container.getCpuUsed();
+        updateCpuUtilization();
+    }
+
+
+    /**
+     * @param container
+     * calculate the remained mem as well as update the mem utilization
+     */
+    private void addMem(Container container){
+        memRemain -= container.getMemUsed();
+        memUsed += container.getMemUsed();
+        updateMemUtilization();
+    }
+
+    private void removeMem(Container container){
+        memRemain += container.getMemUsed();
+        memUsed -= container.getMemUsed();
+        updateMemUtilization();
     }
 }

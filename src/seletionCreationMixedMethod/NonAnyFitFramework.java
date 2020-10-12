@@ -3,8 +3,7 @@ package seletionCreationMixedMethod;
 import dataCenterEntity.*;
 import fitnessFunction.Fitness;
 import fitnessFunction.SelectionCreationFitness;
-import fitnessFunction.SelectionFitness;
-import operationInterface.VMSelectionCreation;
+import operationInterface.HolderSelectionCreation;
 
 import java.util.ArrayList;
 
@@ -15,7 +14,7 @@ import java.util.ArrayList;
  * Without this restriction, we might create an algorithm with more flexiable of allocation
  *
  */
-public class NonAnyFitFramework implements VMSelectionCreation {
+public class NonAnyFitFramework implements HolderSelectionCreation {
 
     private SelectionCreationFitness fitnessFunction;
 
@@ -37,7 +36,7 @@ public class NonAnyFitFramework implements VMSelectionCreation {
      *
      */
     public VM execute(DataCenterInterface dataCenter, Holder container){
-//        DataCenterCombined myDataCenter = (DataCenterCombined) dataCenter;
+//        DataCenter myDataCenter = (DataCenter) dataCenter;
 
         // create another vmList in case of contamination
         ArrayList<VM> newVMList = (ArrayList<VM>) dataCenter.getVmList().clone();
@@ -84,13 +83,13 @@ public class NonAnyFitFramework implements VMSelectionCreation {
             newVmFlag = vmCount >= currentVmNum;
 
             int vmType = vm.getType();
+            int osType = container.getExtraInfo() - 1;
 
 
             // evaluate the VMs
 //            fitnessValue[i] = fitnessFunction(dataCenter, newVMList.get(i), container, creationFlag, vmType);
 //            System.out.println("i = " + i);
-            Double fitnessValue = fitnessFunction(dataCenter, vm, container, newVmFlag, vmType);
-//            System.out.println("fitnessValue[" + i + "] = " + fitnessValue);
+            Double fitnessValue = fitnessFunction(dataCenter, vm, container, newVmFlag, vmType, osType);
             // skip the infeasible solution
             if(fitnessValue == null) {
                 vmCount += 1;
@@ -116,7 +115,11 @@ public class NonAnyFitFramework implements VMSelectionCreation {
         return bestVM;
     }
 
-    private Double fitnessFunction(DataCenterInterface dataCenter, Holder bin, Holder item, boolean creationFlag, int vmType){
+    private Double fitnessFunction(
+                            DataCenterInterface dataCenter,
+                            Holder bin, Holder item,
+                            boolean creationFlag,
+                            int vmType, int osType){
         Double fitnessValue;
 
         if (bin.getCpuRemain() <= item.getCpuUsed() ||
@@ -132,6 +135,7 @@ public class NonAnyFitFramework implements VMSelectionCreation {
                     dataCenter,
                     creationFlag,
                     vmType,
+                    osType,
                     bin.getCpuRemain(),
                     bin.getMemRemain(),
                     item.getCpuUsed(),

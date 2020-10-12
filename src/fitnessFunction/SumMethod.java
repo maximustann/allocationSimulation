@@ -23,6 +23,9 @@ public class SumMethod implements SelectionFitness {
     // Preprocessing on the multi-dimensional resources transform multiple resources into one scalar
     public double evaluate(
                         DataCenterInterface dataCenter,
+                        double binCpuConfiguration,
+                        double binMemOverhead,
+                        double binCpuOverheadRate,
                         double binCpuRemain,
                         double binMemRemain,
                         double itemCpuRequire,
@@ -40,4 +43,31 @@ public class SumMethod implements SelectionFitness {
         sum = cpuMem[0] + cpuMem[1];
         return sum;
     }
+
+    // Used for PM selection
+    public double evaluate(
+            DataCenterInterface dataCenter,
+            double binCpuRemain,
+            double binMemRemain,
+            double binActualCpuUsed,
+            double binActualMemUsed,
+            double itemCpuRequire,
+            double itemMemRequire,
+            double itemActualCpuUsed,
+            double itemAcutalMemUsed){
+        double[] cpuMem;
+        double sum;
+        // calculate the left resources
+        double cpu = binCpuRemain - itemCpuRequire;
+        double mem = binMemRemain - itemMemRequire;
+
+        cpuMem = norm.normalize(cpu, mem);
+
+
+        // core
+        sum = cpuMem[0] + cpuMem[1];
+        return sum;
+    }
+
+
 }

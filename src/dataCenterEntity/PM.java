@@ -23,7 +23,7 @@ public class PM implements Holder {
     private double cpuRemain;
     private double memRemain;
 
-    // used is the acutual used of resources by containers and VM overheads
+    // used is the actual used of resources by containers and VM overheads
     private double cpuUsed;
     private double memUsed;
 
@@ -166,7 +166,7 @@ public class PM implements Holder {
         updateMemUtilization();
     }
 
-    // This method is called by VM after release a container.
+    // This method is called by VM after releasing a container.
     public void releaseOldContainer(double containerCpu, double containerMem){
         cpuUsed -= containerCpu;
         memUsed -= containerMem;
@@ -207,6 +207,14 @@ public class PM implements Holder {
             // If there is not enough resources
         } else {
             System.out.println("ERROR: VM allocation failed, insufficient resources");
+            System.out.println("PM cpuRemain = " + cpuRemain);
+            System.out.println("PM memRemain = " + memRemain);
+            System.out.println("vm cpu = " + vm.getCpuConfiguration());
+            System.out.println("vm mem = " + vm.getMemConfiguration());
+            for(VM vmE:vmList){
+                System.out.println(vmE.getCpuConfiguration() + " : " + vmE.getMemConfiguration());
+            }
+            System.out.println(this.id);
         }
         return vmList;
     }

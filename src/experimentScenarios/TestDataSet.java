@@ -1,40 +1,73 @@
 package experimentScenarios;
 
 public enum TestDataSet {
-    REAL_WORLD_SMALL(
+    AUVERGRID_TEN(
             0,
-            "PMConfig/PMConfig_xSmall",
-            "VMConfig/VMConfig_xSmall",
-            "_REALWORLD_SMALL",
-            "_realData_small"),
-
-    BALANCED_DATA_SMALL(
+            10,
+            "PMConfig/PMConfig_small",
+            "VMConfig/LVMnePM/VMConfig_ten",
+            "_AUVERGRID_TEN",
+            "_AUVERGRID_TEN",
+            "_AUVERGRID_TEN_bestContainerGPTree",
+            "_AUVERGRID_TEN_bestVmGPTree"),
+    BITBRAINS_TEN(
             1,
-            "PMConfig/PMConfig_xSmall",
-            "VMConfig/VMConfig_xSmall",
-            "_BALANCED_SMALL/",
-            "_balanced_small"),
-
-    BALANCED_VM_SMALL(
+            10,
+            "PMConfig/PMConfig_small",
+            "VMConfig/LVMnePM/VMConfig_ten",
+            "_BITBRAINS_TEN",
+            "_BITBRAINS_TEN",
+            "_BITBRAINS_TEN_bestContainerGPTree",
+            "_BITBRAINS_TEN_bestVmGPTree"),
+    AUVERGRID_TWENTY(
             2,
-            "PMConfig/PMConfig_xSmall_balanced",
-            "VMConfig/VMConfig_xSmall_balanced",
-            "_BALANCED_VM_SMALL",
-            "_balancedVM_small");
+            20,
+            "PMConfig/PMConfig_small",
+            "VMConfig/LVMnePM/VMConfig_twenty",
+            "_AUVERGRID_TWENTY",
+            "_AUVERGRID_TWENTY",
+            "_AUVERGRID_TWENTY_bestContainerGPTree",
+            "_AUVERGRID_TWENTY_bestVmGPTree"),
+    BITBRAINS_TWENTY(
+            3,
+            20,
+            "PMConfig/PMConfig_small",
+            "VMConfig/LVMnePM/VMConfig_twenty",
+            "_BITBRAINS_TWENTY",
+            "_BITBRAINS_TWENTY",
+            "_BITBRAINS_TWENTY_bestContainerGPTree",
+            "_BITBRAINS_TWENTY_bestVmGPTree");
+
+
 
     private int id;
+    private int numOfVmTypes;
     private String pmConfig;
     private String vmConfig;
-    private String directory;
-    private String resultDirectory;
+    private String initEnvDirectory;
+    private String testCaseDirectory;
+    private String containerAllocationRulesResultDirectory;
+    private String vmAllocationRulesResultDirectory;
 
-    TestDataSet(int id, String pmConfig, String vmConfig, String directory, String resultDirectory){
+    TestDataSet(
+                int id,
+                int numOfVmTypes,
+                String pmConfig,
+                String vmConfig,
+                String initEnvDirectory,
+                String testCaseDirectory,
+                String containerAllocationRulesResultDirectory,
+                String vmAllocationRulesResultDirectory){
         this.id = id;
+        this.numOfVmTypes = numOfVmTypes;
         this.pmConfig = pmConfig;
         this.vmConfig = vmConfig;
-        this.directory = directory;
-        this.resultDirectory = resultDirectory;
+        this.initEnvDirectory = initEnvDirectory;
+        this.testCaseDirectory= testCaseDirectory;
+        this.containerAllocationRulesResultDirectory = containerAllocationRulesResultDirectory;
+        this.vmAllocationRulesResultDirectory = vmAllocationRulesResultDirectory;
     }
+
     public int getId(){
         return id;
     }
@@ -45,11 +78,23 @@ public enum TestDataSet {
         return vmConfig;
     }
 
-    public String getDirectory() {
-        return directory;
+    public String getTestCaseDirectory() {
+        return testCaseDirectory;
     }
 
-    public String getResultDirectory() {
-        return resultDirectory;
+    public int getNumOfVmTypes() {
+        return numOfVmTypes;
+    }
+
+    public String getInitEnvDirectory() {
+        return initEnvDirectory;
+    }
+
+    public String getContainerAllocationRulesResultDirectory() {
+        return containerAllocationRulesResultDirectory;
+    }
+
+    public String getVmAllocationRulesResultDirectory() {
+        return vmAllocationRulesResultDirectory;
     }
 }

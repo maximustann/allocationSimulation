@@ -23,6 +23,7 @@ public class ReadConfigures {
             CSVReader csvReader = new CSVReader(reader);
             String[] nextRecord;
 
+
             // keep reading from the file
             while((nextRecord = csvReader.readNext()) != null){
                  Double[] record = new Double[nextRecord.length];
@@ -31,8 +32,8 @@ public class ReadConfigures {
                 }
                 data.add(record);
             }
-        } catch(IOException e1){
-            e1.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return data;
     }

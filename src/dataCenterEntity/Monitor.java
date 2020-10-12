@@ -10,14 +10,18 @@ public class Monitor {
     private ArrayList<Double> energyList;
     private ArrayList<Double> accEnergyList;
     private ArrayList<Double> wastedCPU;
-    private ArrayList<Double> wastedOverhead;
+    private ArrayList<Double> wastedMem;
+    private ArrayList<Double> wastedCpuOverhead;
+    private ArrayList<Double> wastedMemOverhead;
 
     public Monitor(){
         writeFile = new WriteFile();
         energyList = new ArrayList<Double>();
         accEnergyList = new ArrayList<Double>();
         wastedCPU = new ArrayList<Double>();
-        wastedOverhead = new ArrayList<Double>();
+        wastedMem = new ArrayList<Double>();
+        wastedCpuOverhead = new ArrayList<Double>();
+        wastedMemOverhead = new ArrayList<Double>();
     }
 
 
@@ -37,11 +41,14 @@ public class Monitor {
         }
     }
 
-    public void udpateWasteEnergy(DataCenterInterface dataCenter, ArrayList<PM> pmList, ArrayList<VM> vmList){
-        DataCenterCombined myDataCenter = (DataCenterCombined) dataCenter;
+    public void udpateWasteEnergy(DataCenterInterface dataCenter, ArrayList<PM> pmList){
+        DataCenter myDataCenter = (DataCenter) dataCenter;
 
-        double wastedC = 0;
-        double wastedO = 0;
+        double currentWastedCpu = 0;
+        double currentWastedCpuOverhead = 0;
+
+        double currentWastedMem = 0;
+        double currentWastedMemOverhead = 0;
 
         double k = myDataCenter.getK();
         double maxEnergy = myDataCenter.getMaxEnergy();
@@ -49,33 +56,43 @@ public class Monitor {
         // for each pm
         for(PM pm:pmList){
             double pmWastedCpu = 0;
-            double pmWastedOverhead = 0;
+            double pmWastedMem = 0;
+
+            double pmWastedCpuOverhead = 0;
+            double pmWastedMemOverhead = 0;
+
+            // get the VMs in this PM
             ArrayList<VM> indVMList = pm.getVMList();
 
-            // calculate the wasted CPU inside each VM, add the wasted CPU up
+            // calculate the wasted resources and overheads
             for(VM vm:indVMList){
-                pmWastedCpu += vm.getCpuConfiguration() - vm.getCpuConfiguration() * VM.CPU_OVERHEAD_RATE - vm.getCpuUsed();
-                pmWastedOverhead += vm.getCpuConfiguration() * VM.CPU_OVERHEAD_RATE;
+                pmWastedCpu += vm.getCpuConfiguration()  - vm.getCpuUsed();
+                pmWastedMem += vm.getMemConfiguration() - vm.getMemUsed();
+                pmWastedCpuOverhead += vm.getCpuConfiguration() * VM.CPU_OVERHEAD_RATE;
+                pmWastedMemOverhead += VM.MEM_OVERHEAD;
             }
-            // add up the remain CPU in this PM
+            // add up the remain CPU and Memory in this PM
             pmWastedCpu += pm.getCpuRemain();
+            pmWastedMem += pm.getMemRemain();
 
-            // calculate the wasted utilization, then calculate the wasted energy
-            wastedC += (pmWastedCpu / pm.getCpuConfiguration()) * (1 - k) * maxEnergy;
-            wastedO += (pmWastedOverhead / pm.getCpuConfiguration()) * (1 - k) * maxEnergy;
+            // calculate the wasted resources and overheads
+            currentWastedCpu += pmWastedCpu;
+            currentWastedMem += pmWastedMem;
+
+            currentWastedCpuOverhead += pmWastedCpuOverhead;
+            currentWastedMemOverhead += pmWastedMemOverhead;
+
         }
-        if(!wastedCPU.isEmpty())
-            wastedC += wastedCPU.get(wastedCPU.size() - 1);
-        if(!wastedOverhead.isEmpty())
-            wastedO += wastedOverhead.get(wastedOverhead.size() - 1);
 
-        wastedCPU.add(wastedC);
-        wastedOverhead.add(wastedO);
+        wastedCpuOverhead.add(currentWastedCpuOverhead);
+        wastedCPU.add(currentWastedCpu);
+        wastedMem.add(currentWastedMem);
+        wastedMemOverhead.add(currentWastedMemOverhead);
     }
 
     public void writeWaste(String path){
         try {
-            writeFile.writeWaste(path, wastedCPU, wastedOverhead);
+            writeFile.writeWaste(path, wastedCPU, wastedCpuOverhead, wastedMem, wastedMemOverhead);
         } catch (IOException e){
             e.printStackTrace();
         }
@@ -102,7 +119,6 @@ public class Monitor {
             Energy
             NUM of VM
             Two Resource balance
-
          */
         ArrayList<double[]> statusList = new ArrayList();
 

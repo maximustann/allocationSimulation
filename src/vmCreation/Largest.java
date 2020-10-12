@@ -14,7 +14,20 @@ public class Largest implements VMCreation {
         double[] vmCpu = dataCenter.getVmCpu();
         double[] vmMem = dataCenter.getVmMem();
 
-        return new VM(vmCpu[vmCpu.length - 1], vmMem[vmMem.length - 1], vmCpu.length - 1);
+        int index = findLargest(vmCpu, vmMem);
+        return new VM(vmCpu[index], vmMem[index], index);
+    }
+
+    private int findLargest(double[] cpu, double[] mem){
+        double total = 0;
+        int index = 0;
+        for(int i = 0; i < cpu.length; i++){
+            if(total < cpu[i] + mem[i]){
+                total = cpu[i] + mem[i];
+                index = i;
+            }
+        }
+        return index;
     }
 
 

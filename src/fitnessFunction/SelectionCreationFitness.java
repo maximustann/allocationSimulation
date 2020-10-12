@@ -9,6 +9,7 @@ public interface SelectionCreationFitness extends Fitness {
             DataCenterInterface dataCenter,
             boolean creationFlag,
             int vmType,
+            int osType,
             double binCpuRemain,
             double binMemRemain,
             double itemCpuRequire,

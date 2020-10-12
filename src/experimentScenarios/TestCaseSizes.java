@@ -1,17 +1,23 @@
 package experimentScenarios;
 
 public enum TestCaseSizes {
-    SMALL(
+    MINI(
             80,
             "Container80"),
 
-    MEDIUM(
+    SMALL(
             200,
             "Container200"),
+    MEDIUM(500,
+            "Container500"),
 
     LARGE(
-            5000,
-            "Container5000");
+            1000,
+            "Container1000"),
+    xLarge(
+            2500,
+            "Container2500"
+    );
 
     private int testSize;
     private String directory;

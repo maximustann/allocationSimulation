@@ -1,15 +1,12 @@
 package pmCreation;
 
+import dataCenterEntity.DataCenterInterface;
 import dataCenterEntity.PM;
+import dataCenterEntity.VM;
 import operationInterface.PMCreation;
 
 public class SimplePM implements PMCreation {
-    public PM execute(
-                double pmCpu,
-                double pmMem,
-                double k,
-                double maxEnergy) {
-
-        return new PM(pmCpu, pmMem, k, maxEnergy);
+    public PM execute(DataCenterInterface dataCenter, VM vm) {
+        return new PM(dataCenter.getPmCpu(), dataCenter.getPmMem(), dataCenter.getK(), dataCenter.getMaxEnergy());
     }
 }

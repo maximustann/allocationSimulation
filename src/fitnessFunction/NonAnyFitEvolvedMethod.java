@@ -17,7 +17,6 @@ public class NonAnyFitEvolvedMethod implements SelectionCreationFitness {
     public NonAnyFitEvolvedMethod(Normalization norm, String expression){
         this.norm = norm;
         this.expression = expression;
-        System.out.println(expression);
     }
 
 
@@ -26,6 +25,7 @@ public class NonAnyFitEvolvedMethod implements SelectionCreationFitness {
 						DataCenterInterface dataCenter,
                         boolean creationFlag,
                         int vmType,
+                        int osType,
                         double binCpuRemain,
                         double binMemRemain,
                         double itemCpuRequire,
@@ -49,25 +49,14 @@ public class NonAnyFitEvolvedMethod implements SelectionCreationFitness {
         normalizedBin = norm.normalize(binCpuRemain, binMemRemain);
         normalizedItem = norm.normalize(itemCpuRequire, itemMemRequire);
 
-        double normalizedBinCpu = normalizedBin[0];
-        double normalizedBinMem = normalizedBin[1];
         double normalizedItemCpu = normalizedItem[0];
         double normalizedItemMem = normalizedItem[1];
         double leftVmCpu = normalizedBin[0] - normalizedItem[0];
         double leftVmMem = normalizedBin[1] - normalizedItem[1];
+        double coOsProb = dataCenter.getOsProb()[osType];
 
         Parser parser = new Parser();
 
-//        System.out.println("=====");
-//        System.out.println("normalizedItemMem = " + normalizedItemMem);
-//        System.out.println("leftVmMem = " + leftVmMem);
-//        System.out.println("leftVmCpu = " + leftVmCpu);
-//        System.out.println("normalizedBinCpu = " + normalizedBinCpu);
-//        System.out.println("normalizedItemCpu = " + normalizedItemCpu);
-//        System.out.println("normalizedBinMem = " + normalizedBinMem);
-//        System.out.println("normalizedVmCpuOverhead = " + normalizedVmCpuOverhead);
-//        System.out.println("normalizedVmMemOverhead = " + normalizedVmMemOverhead);
-//        System.out.println(expression);
         try
         {
             ExpressionNode expr = parser.parse(expression);
@@ -77,10 +66,8 @@ public class NonAnyFitEvolvedMethod implements SelectionCreationFitness {
             expr.accept(new SetVariable("normalizedItemCpu", normalizedItemCpu));
             expr.accept(new SetVariable("normalizedVmCpuOverhead", normalizedVmCpuOverhead));
             expr.accept(new SetVariable("normalizedVmMemOverhead", normalizedVmMemOverhead));
-//            expr.accept(new SetVariable("normalizedBinCpu", normalizedBinCpu));
-//            expr.accept(new SetVariable("normalizedBinMem", normalizedBinMem));
+            expr.accept(new SetVariable("coOsProb", coOsProb));
             value = expr.getValue();
-//            System.out.println("value = " + value);
 
         }
         catch (ParserException e)
@@ -92,7 +79,6 @@ public class NonAnyFitEvolvedMethod implements SelectionCreationFitness {
             System.out.println(e.getMessage());
         }
 
-//        System.out.println("value = " + value);
         return value;
     }
 }
